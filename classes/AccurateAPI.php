@@ -463,6 +463,50 @@ class AccurateAPI {
         return $this->makeRequest($url, 'GET');
     }
 
+
+    public function getWarehouseList($params = [], $page = null) {
+        $url = $this->host . '/accurate/api/warehouse/list.do';
+        
+        // Parameter default
+        $defaultParams = [
+            'sp.pageSize' => 25,
+            'sp.page' => 1
+        ];
+        
+        // Handle backward compatibility - jika params adalah integer (limit)
+        if (is_int($params) && $page !== null) {
+            $params = [
+                'sp.pageSize' => $params,
+                'sp.page' => $page
+            ];
+        } elseif (!is_array($params)) {
+            $params = [];
+        }
+        
+        // Merge dengan parameter yang diberikan
+        $queryParams = array_merge($defaultParams, $params);
+        
+        // Build URL dengan query parameters
+        if (!empty($queryParams)) {
+            $url .= '?' . http_build_query($queryParams);
+        }
+        
+        return $this->makeRequest($url, 'GET');
+    }
+
+    
+    public function getWarehouseDetail($id) {
+        $url = $this->host . '/accurate/api/warehouse/detail.do';
+        
+        $params = [
+            'id' => $id
+        ];
+        
+        $url .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($url, 'GET');
+    }
+
 }
 
 ?>
