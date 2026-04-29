@@ -408,11 +408,7 @@ class AccurateAPI {
         return $this->makeRequest($url, 'GET');
     }
 
-    /**
-     * Get customer detail berdasarkan ID
-     * @param int $customerId ID customer
-     * @return array Response dari API
-     */
+    
     public function getCustomerDetail($customerId) {
         // Validasi ID customer
         if (empty($customerId)) {
@@ -427,6 +423,39 @@ class AccurateAPI {
         
         $params = [
             'id' => $customerId
+        ];
+        
+        $url .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($url, 'GET');
+    }
+
+    public function getBranchList($params = []) {
+        $url = $this->host . '/accurate/api/branch/list.do';
+        
+        // Parameter default
+        $defaultParams = [
+            'sp.pageSize' => 25,
+            'sp.page' => 1
+        ];
+        
+        // Merge dengan parameter yang diberikan
+        $queryParams = array_merge($defaultParams, $params);
+        
+        // Build URL dengan query parameters
+        if (!empty($queryParams)) {
+            $url .= '?' . http_build_query($queryParams);
+        }
+        
+        return $this->makeRequest($url, 'GET');
+    }
+
+   
+    public function getBranchDetail($id) {
+        $url = $this->host . '/accurate/api/branch/detail.do';
+        
+        $params = [
+            'id' => $id
         ];
         
         $url .= '?' . http_build_query($params);
