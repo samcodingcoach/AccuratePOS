@@ -380,6 +380,60 @@ class AccurateAPI {
         return $this->makeRequest($url, 'GET');
     }
 
+    public function getCustomerList($params = [], $page = null) {
+        $url = $this->host . '/accurate/api/customer/list.do';
+        
+        // Default parameters
+        $defaultParams = [
+            'sp.page' => 1,
+            'sp.pageSize' => 100,
+            'fields' => 'id,name,no,customerNo,email,mobilePhone,phone,address,createDate,createdDate,lastUpdate,balanceList'
+        ];
+        
+        // Handle backward compatibility - jika params adalah integer (limit)
+        if (is_int($params) && $page !== null) {
+            $params = [
+                'sp.pageSize' => $params,
+                'sp.page' => $page
+            ];
+        } elseif (!is_array($params)) {
+            $params = [];
+        }
+        
+        // Merge dengan params yang diberikan
+        $params = array_merge($defaultParams, $params);
+        
+        $url .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($url, 'GET');
+    }
+
+    /**
+     * Get customer detail berdasarkan ID
+     * @param int $customerId ID customer
+     * @return array Response dari API
+     */
+    public function getCustomerDetail($customerId) {
+        // Validasi ID customer
+        if (empty($customerId)) {
+            return [
+                'success' => false,
+                'message' => 'Customer ID is required',
+                'data' => null
+            ];
+        }
+        
+        $url = $this->host . '/accurate/api/customer/detail.do';
+        
+        $params = [
+            'id' => $customerId
+        ];
+        
+        $url .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($url, 'GET');
+    }
+
 }
 
 ?>

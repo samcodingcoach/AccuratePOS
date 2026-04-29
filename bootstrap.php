@@ -19,9 +19,10 @@ spl_autoload_register(function ($class) {
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/utils/utils.php';
 
-// Create logs directory if not exists
-$logDir = __DIR__ . '/logs';
-if (!is_dir($logDir)) {
-    mkdir($logDir, 0755, true);
+// Contoh di bootstrap.php line 25
+$logPath = __DIR__ . '/logs';
+if (!is_dir($logPath)) {
+    // Tambahkan parameter true untuk recursive mkdir
+    mkdir($logPath, 0775, true); 
 }
 ?>
