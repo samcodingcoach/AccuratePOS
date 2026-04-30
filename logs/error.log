@@ -1,0 +1,2 @@
+2026-04-30 10:33:00 - ERROR: API Error: invalid_token (HTTP 401) - URL: https://odin.accurate.id/accurate/api/customer/list.do?sp.page=1&sp.pageSize=25&fields=id%2Cname%2Cno%2CcustomerNo%2Cemail%2CmobilePhone%2Cphone%2Caddress%2CcreateDate%2CcreatedDate%2ClastUpdate%2CbalanceList in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 155
+2026-04-30 10:33:00 - ERROR: Customer List Error: invalid_token in /var/www/html/pos-accurate/api/customer/list.php on line 96

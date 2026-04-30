@@ -5,21 +5,21 @@
  */
 
 // Konfigurasi OAuth
-define('OAUTH_CLIENT_ID', 'c0f130ce-1e13-42a8-97a5-714d8e492b08');
-define('OAUTH_CLIENT_SECRET', 'cc001a5f04678825fec7a52d553944a6');
+define('OAUTH_CLIENT_ID', '49fb8a46-7571-483e-b9db-38ed89d5b144');
+define('OAUTH_CLIENT_SECRET', '65e34d55759c2810fc31a9188f735474');
 define('OAUTH_REDIRECT_URI', 'https://perdurably-defunctive-gauge.ngrok-free.dev/nuansa/callback.php');
 
 // Konfigurasi API Accurate
 define('ACCURATE_API_HOST', 'https://odin.accurate.id');
 define('ACCURATE_AUTH_HOST', 'https://account.accurate.id');
-define('ACCURATE_ACCESS_TOKEN', 'cc0979c6-769e-4301-9d24-7eb870e554a2');
-define('ACCURATE_TOKEN_SCOPE', 'item_view branch_view item_category_view vendor_view sales_order_delete warehouse_view sales_order_view sales_receipt_view purchase_order_view sales_order_save customer_view glaccount_view');
-define('ACCURATE_REFRESH_TOKEN', '9ff95ac6-faab-42ad-b880-22b3ead27598');
-define('ACCURATE_SESSION_ID', '0617b2a5-0b52-4995-8c72-fa2fb8ceefa2');
+define('ACCURATE_ACCESS_TOKEN', '7b401235-3ac7-41c4-8dd3-e59e0cea5a55');
+define('ACCURATE_TOKEN_SCOPE', 'item_view branch_view vendor_view sales_order_delete warehouse_view sales_order_view sales_receipt_view sales_order_save customer_view glaccount_view');
+define('ACCURATE_REFRESH_TOKEN', 'acdf802d-680c-45c1-9578-b3bc0d0d928f');
+define('ACCURATE_SESSION_ID', '8e86344a-6f07-4ded-984f-71d712d467fb');
 define('ACCURATE_DATABASE_ID', '2555193');
 
 // Konfigurasi aplikasi
-define('APP_NAME', 'POS Accurate API');
+define('APP_NAME', 'Nuansa Accurate API');
 define('APP_VERSION', '1.0.0');
 define('DEFAULT_TIMEZONE', 'Asia/Jakarta');
 
