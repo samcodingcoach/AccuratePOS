@@ -556,20 +556,32 @@ class AccurateAPI {
         return $this->makeRequest($url, 'GET');
     }
 
-    // AccurateAPI.php
+    public function getItemStock($itemNo, $warehouseName = '') {
+        if (empty($itemNo)) return ['success' => false, 'message' => 'Nomor barang (no) diperlukan'];
 
-public function getItemStock($itemNo, $warehouseName = '') {
-    if (empty($itemNo)) return ['success' => false, 'message' => 'Nomor barang (no) diperlukan'];
+        $url = $this->host . '/accurate/api/item/get-stock.do';
+        $params = ['no' => $itemNo];
+        
+        // Jika warehouseName diisi, tambahkan ke parameter
+        if (!empty($warehouseName)) {
+            $params['warehouseName'] = $warehouseName;
+        }
 
-    $url = $this->host . '/accurate/api/item/get-stock.do';
-    $params = ['no' => $itemNo];
-    
-    // Jika warehouseName diisi, tambahkan ke parameter
-    if (!empty($warehouseName)) {
-        $params['warehouseName'] = $warehouseName;
+        $url .= '?' . http_build_query($params);
+        return $this->makeRequest($url, 'GET');
     }
 
+    public function getSellingPrice($params) {
+    // Validasi minimal harus ada 'no' atau 'upcNo'
+    if (empty($params['no']) && empty($params['upcNo'])) {
+        return ['success' => false, 'message' => 'Nomor barang (no) atau UPC diperlukan'];
+    }
+
+    $url = $this->host . '/accurate/api/item/get-selling-price.do';
+    
+    // Membangun query string dari parameter yang diberikan (branchName, priceCategoryName, dll)
     $url .= '?' . http_build_query($params);
+    
     return $this->makeRequest($url, 'GET');
 }
 
