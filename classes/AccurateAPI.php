@@ -541,19 +541,6 @@ class AccurateAPI {
         return $this->makeRequest($url, 'GET');
     }
 
-    // AccurateAPI.php
-
-    public function getItemStock($itemNo, $warehouseName = '') {
-        if (empty($itemNo)) return ['success' => false, 'message' => 'No item'];
-        
-        $url = $this->host . '/accurate/api/item/get-stock.do';
-        $params = ['no' => $itemNo];
-        if (!empty($warehouseName)) $params['warehouseName'] = $warehouseName;
-
-        $url .= '?' . http_build_query($params);
-        return $this->makeRequest($url, 'GET');
-    }
-
     public function getItemByUPC($upcNo) 
     {
         if (empty($upcNo)) return ['success' => false, 'message' => 'UPC No is required'];
@@ -568,6 +555,23 @@ class AccurateAPI {
         $url .= '?' . http_build_query($params);
         return $this->makeRequest($url, 'GET');
     }
+
+    // AccurateAPI.php
+
+public function getItemStock($itemNo, $warehouseName = '') {
+    if (empty($itemNo)) return ['success' => false, 'message' => 'Nomor barang (no) diperlukan'];
+
+    $url = $this->host . '/accurate/api/item/get-stock.do';
+    $params = ['no' => $itemNo];
+    
+    // Jika warehouseName diisi, tambahkan ke parameter
+    if (!empty($warehouseName)) {
+        $params['warehouseName'] = $warehouseName;
+    }
+
+    $url .= '?' . http_build_query($params);
+    return $this->makeRequest($url, 'GET');
+}
 
     
 }
