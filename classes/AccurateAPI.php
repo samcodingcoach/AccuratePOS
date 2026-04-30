@@ -494,7 +494,6 @@ class AccurateAPI {
         return $this->makeRequest($url, 'GET');
     }
 
-    
     public function getWarehouseDetail($id) {
         $url = $this->host . '/accurate/api/warehouse/detail.do';
         
@@ -507,6 +506,55 @@ class AccurateAPI {
         return $this->makeRequest($url, 'GET');
     }
 
+
+ 
+
+    public function getItemList($limit = 100, $page = 1, $filters = []) 
+    {
+        $url = $this->host . '/accurate/api/item/list.do';
+        $params = [
+            'sp.pageSize' => $limit,
+            'sp.page' => $page,
+            // Tambahkan upcNo (barcode) agar tersedia di list
+            'fields' => 'id,name,no,upcNo,itemType,unitPrice,availableToSell,lastUpdate,itemCategory'
+        ];
+        if (!empty($filters)) {
+            $params = array_merge($params, $filters);
+        }
+        $url .= '?' . http_build_query($params);
+        return $this->makeRequest($url);
+    }
+
+    public function getItemDetail($itemId) {
+        if (empty($itemId)) {
+            return ['success' => false, 'message' => 'Item ID is required', 'data' => null];
+        }
+        
+        $url = $this->host . '/accurate/api/item/detail.do';
+        
+        // Hapus parameter 'fields' untuk mendapatkan seluruh data (All Fields)
+        $params = [
+            'id' => $itemId
+        ];
+        
+        $url .= '?' . http_build_query($params);
+        return $this->makeRequest($url, 'GET');
+    }
+
+    // AccurateAPI.php
+
+public function getItemStock($itemNo, $warehouseName = '') {
+    if (empty($itemNo)) return ['success' => false, 'message' => 'No item'];
+    
+    $url = $this->host . '/accurate/api/item/get-stock.do';
+    $params = ['no' => $itemNo];
+    if (!empty($warehouseName)) $params['warehouseName'] = $warehouseName;
+
+    $url .= '?' . http_build_query($params);
+    return $this->makeRequest($url, 'GET');
+}
+
+    
 }
 
 ?>
