@@ -543,16 +543,30 @@ class AccurateAPI {
 
     // AccurateAPI.php
 
-public function getItemStock($itemNo, $warehouseName = '') {
-    if (empty($itemNo)) return ['success' => false, 'message' => 'No item'];
-    
-    $url = $this->host . '/accurate/api/item/get-stock.do';
-    $params = ['no' => $itemNo];
-    if (!empty($warehouseName)) $params['warehouseName'] = $warehouseName;
+    public function getItemStock($itemNo, $warehouseName = '') {
+        if (empty($itemNo)) return ['success' => false, 'message' => 'No item'];
+        
+        $url = $this->host . '/accurate/api/item/get-stock.do';
+        $params = ['no' => $itemNo];
+        if (!empty($warehouseName)) $params['warehouseName'] = $warehouseName;
+
+        $url .= '?' . http_build_query($params);
+        return $this->makeRequest($url, 'GET');
+    }
+
+    public function getItemByUPC($upcNo) {
+    if (empty($upcNo)) return ['success' => false, 'message' => 'UPC No is required'];
+
+    $url = $this->host . '/accurate/api/item/list.do';
+    $params = [
+        'filter.upcNo.keywords' => $upcNo,
+        'filter.upcNo.op' => 'EQUAL',
+        // Parameter fields dihapus agar mendapatkan seluruh kolom yang tersedia di list
+    ];
 
     $url .= '?' . http_build_query($params);
     return $this->makeRequest($url, 'GET');
-}
+    }
 
     
 }
