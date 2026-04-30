@@ -554,18 +554,19 @@ class AccurateAPI {
         return $this->makeRequest($url, 'GET');
     }
 
-    public function getItemByUPC($upcNo) {
-    if (empty($upcNo)) return ['success' => false, 'message' => 'UPC No is required'];
+    public function getItemByUPC($upcNo) 
+    {
+        if (empty($upcNo)) return ['success' => false, 'message' => 'UPC No is required'];
 
-    $url = $this->host . '/accurate/api/item/list.do';
-    $params = [
-        'filter.upcNo.keywords' => $upcNo,
-        'filter.upcNo.op' => 'EQUAL',
-        // Parameter fields dihapus agar mendapatkan seluruh kolom yang tersedia di list
-    ];
+        // Menggunakan endpoint sesuai gambar dokumentasi baru
+        $url = $this->host . '/accurate/api/item/search-by-no-upc.do';
+        
+        $params = [
+            'keywords' => $upcNo // Parameter sesuai dokumentasi gambar
+        ];
 
-    $url .= '?' . http_build_query($params);
-    return $this->makeRequest($url, 'GET');
+        $url .= '?' . http_build_query($params);
+        return $this->makeRequest($url, 'GET');
     }
 
     
