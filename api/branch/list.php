@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../utils/api_auth.php';
 
 // 1. Set Standar Header
 header('Content-Type: application/json; charset=UTF-8');
