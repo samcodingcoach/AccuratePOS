@@ -408,5 +408,65 @@ class AccurateAPI {
         $endpoint .= '?' . http_build_query($params);
         return $this->makeRequest($endpoint, 'GET');
     }
+
+
+    /**
+     * Mendapatkan daftar Karyawan (Employee)
+     * Scope: employee_view
+     */
+    public function getEmployeeList($params = array(), $page = null) {
+        $endpoint = 'accurate/api/employee/list.do';
+        
+        $defaultParams = array(
+            'sp.pageSize' => 100,
+            'sp.page' => 1,
+            // Anda bisa mengatur default fields jika diperlukan
+            // 'fields' => 'id,name,no,email,mobilePhone,position'
+        );
+        
+        // Handle backward compatibility (jika parameter pertama adalah limit/pageSize)
+        if (is_int($params) && $page !== null) {
+            $params = array(
+                'sp.pageSize' => $params,
+                'sp.page' => $page
+            );
+        } elseif (!is_array($params)) {
+            $params = array();
+        }
+        
+        $queryParams = array_merge($defaultParams, $params);
+        
+        if (!empty($queryParams)) {
+            $endpoint .= '?' . http_build_query($queryParams);
+        }
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
+    /**
+     * Mendapatkan detail Karyawan (Employee) berdasarkan ID atau Number
+     * Scope: employee_view
+     */
+    public function getEmployeeDetail($id = null, $number = null) {
+        $endpoint = 'accurate/api/employee/detail.do';
+        $params = array();
+
+        if (!empty($id)) {
+            $params['id'] = $id;
+        } elseif (!empty($number)) {
+            // Catatan: Dokumentasi Accurate terkadang menggunakan 'no' untuk Nomor Karyawan,
+            // namun beberapa endpoint menggunakan 'number'. Kita sesuaikan dengan parameter yang diminta.
+            $params['no'] = $number; 
+        } else {
+            return array(
+                'success' => false,
+                'error' => 'ID atau Nomor Karyawan tidak boleh kosong'
+            );
+        }
+        
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>
