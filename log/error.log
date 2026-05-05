@@ -1,2 +1,3 @@
 [2026-05-05 10:40:35] Error in /var/www/html/pos-accurate/api/branch/list.php on line 92: Branch API Error: Gagal mengambil daftar branch
 [2026-05-05 10:45:59] Error in /var/www/html/pos-accurate/api/branch/list.php on line 92: Branch API Error: Gagal mengambil daftar branch
+[2026-05-05 16:35:50] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: customerNo harus diisi (HTTP 200) - URL: https://odin.accurate.id/accurate/api/sales-invoice/detail-invoice.do?sp.pageSize=100&sp.page=1

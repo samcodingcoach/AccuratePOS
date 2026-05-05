@@ -526,5 +526,28 @@ class AccurateAPI {
         
         return $this->makeRequest($endpoint, 'GET');
     }
+
+    /**
+     * Menampilkan faktur penjualan berdasarkan filter tertentu (customerNo, fromDate, toDate)
+     * Endpoint: /accurate/api/sales-invoice/detail-invoice.do
+     * Scope: sales_invoice_view
+     */
+    public function getSalesInvoiceDetailFiltered($params = array()) {
+        $endpoint = 'accurate/api/sales-invoice/detail-invoice.do';
+        
+        // Parameter default untuk paginasi (jika endpoint ini mendukung paginasi)
+        $defaultParams = array(
+            'sp.pageSize' => 100,
+            'sp.page' => 1
+        );
+        
+        $queryParams = array_merge($defaultParams, $params);
+        
+        if (!empty($queryParams)) {
+            $endpoint .= '?' . http_build_query($queryParams);
+        }
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>
