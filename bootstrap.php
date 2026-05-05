@@ -1,28 +1,14 @@
 <?php
 /**
- * Bootstrap file untuk autoload dan inisialisasi aplikasi
+ * File: bootstrap.php
  */
 
-// Error handling
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
+// Zona Waktu Wajib (Sangat krusial untuk X-Api-Timestamp Accurate)
+date_default_timezone_set("Asia/Makassar");
 
-// Autoload classes
-spl_autoload_register(function ($class) {
-    $file = __DIR__ . '/classes/' . $class . '.php';
-    if (file_exists($file)) {
-        require_once $file;
-    }
-});
-
-// Load config dan utils
+// Autoload / Require Config dan Classes
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/utils/utils.php';
+require_once __DIR__ . '/classes/AccurateAPI.php';
 
-// Contoh di bootstrap.php line 25
-$logPath = __DIR__ . '/logs';
-if (!is_dir($logPath)) {
-    // Tambahkan parameter true untuk recursive mkdir
-    mkdir($logPath, 0775, true); 
-}
 ?>

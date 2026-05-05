@@ -1,33 +1,10 @@
 <?php
 /**
- * Konfigurasi terpusat untuk aplikasi Accurate API
- * File ini berisi semua konfigurasi yang dibutuhkan aplikasi
+ * File: config/config.php
  */
 
-// Konfigurasi OAuth
-define('OAUTH_CLIENT_ID', '49fb8a46-7571-483e-b9db-38ed89d5b144');
-define('OAUTH_CLIENT_SECRET', '65e34d55759c2810fc31a9188f735474');
-define('OAUTH_REDIRECT_URI', 'https://perdurably-defunctive-gauge.ngrok-free.dev/nuansa/callback.php');
+define('ACCURATE_APP_KEY', 'd1a88155-a228-4570-92da-92aacd87866f');
+define('ACCURATE_SIGNATURE_SECRET', '3mOdcD1gBl9fe7K7hq0VwOahTbf1KKsaFUTQ8fuBXrwFxTH9vvth1869meGKNS9T');
+define('ACCURATE_API_TOKEN', 'aat.NTA.eyJ2IjoxLCJ1Ijo5MjY2MzYsImQiOjI2NDA3NjksImFpIjo2ODcyMCwiYWsiOiJkMWE4ODE1NS1hMjI4LTQ1NzAtOTJkYS05MmFhY2Q4Nzg2NmYiLCJhbiI6IkFQSV9QT1MiLCJhcCI6IjQ5ZmI4YTQ2LTc1NzEtNDgzZS1iOWRiLTM4ZWQ4OWQ1YjE0NCIsInQiOjE3Nzc5NDc4MjU0NTR9.EYzZRKvh6znPwbjxqqS4i/WPHo1pFLiMHyf9Pqpv1h/6rfj3Wucca348+seJofaUFWuIRdNAC75/lyiVfNagpVgsDD7zvoUdQGzCkkm8JDIpzH/zzhXH+ZNuwf/Diosjj4Kvnvy+P+8jBY41NJYyU2PuVSjCTOG3mFtcPX9LWZU+7mWXSyqpz3bry18AQqNA2rdG+qB8BGs=.jJkT5kBRrM8kzVxlnMwIWa1gWE7h2Ifm3EC2OvZdC8M');
 
-// Konfigurasi API Accurate
-define('ACCURATE_API_HOST', 'https://odin.accurate.id');
-define('ACCURATE_AUTH_HOST', 'https://account.accurate.id');
-define('ACCURATE_ACCESS_TOKEN', '7b401235-3ac7-41c4-8dd3-e59e0cea5a55');
-define('ACCURATE_TOKEN_SCOPE', 'item_view branch_view vendor_view sales_order_delete warehouse_view sales_order_view sales_receipt_view sales_order_save customer_view glaccount_view');
-define('ACCURATE_REFRESH_TOKEN', 'acdf802d-680c-45c1-9578-b3bc0d0d928f');
-define('ACCURATE_SESSION_ID', '8e86344a-6f07-4ded-984f-71d712d467fb');
-define('ACCURATE_DATABASE_ID', '2555193');
-
-// Konfigurasi aplikasi
-define('APP_NAME', 'Nuansa Accurate API');
-define('APP_VERSION', '1.0.0');
-define('DEFAULT_TIMEZONE', 'Asia/Jakarta');
-
-// Set timezone default
-date_default_timezone_set(DEFAULT_TIMEZONE);
-
-// Konfigurasi error reporting untuk development
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 ?>

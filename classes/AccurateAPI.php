@@ -1,101 +1,126 @@
 <?php
 /**
  * Class AccurateAPI untuk handle semua API calls ke Accurate
- * Menggabungkan semua fungsi API dalam satu class yang terorganisir
+ * Versi Kompatibel: PHP 5.6
+ * Integrasi Auth: API Token Version 1.0.3 (Non-OAuth)
  */
-
-
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../utils/utils.php';
 
 class AccurateAPI {
-    private $accessToken;
-    private $sessionId;
-    private $host;
-    private $authHost;
-    private $databaseId;
+    private $apiToken;
+    private $signatureSecret;
+    public $host;
     
     public function __construct() {
-        $this->accessToken = ACCURATE_ACCESS_TOKEN;
-        $this->sessionId = ACCURATE_SESSION_ID;
-        $this->host = ACCURATE_API_HOST;
-        $this->authHost = ACCURATE_AUTH_HOST;
-        $this->databaseId = ACCURATE_DATABASE_ID;
-    }
-    
-    public function setAccessToken($newToken) {
-        $this->accessToken = $newToken;
-    }
-    
-    public function setSessionId($newSessionId) {
-        $this->sessionId = $newSessionId;
-    }
-    
-    public function setHost($newHost) {
-        $this->host = $newHost;
+        // Mengambil kredensial dari config.php
+        $this->apiToken = ACCURATE_API_TOKEN;
+        $this->signatureSecret = ACCURATE_SIGNATURE_SECRET;
+        
+        // Mengambil host URL secara otomatis saat class dipanggil
+        $this->host = $this->resolveHost();
     }
     
     /**
-     * Get current session ID
-     * @return string Current session ID
+     * Memanggil /api/api-token.do untuk mendapatkan URL Host (misal: https://odin.accurate.id)
      */
-    public function getSessionId() {
-        return $this->sessionId;
+    private function resolveHost() {
+        $url = 'https://account.accurate.id/api/api-token.do';
+        $response = $this->executeCurl($url, 'POST');
+        
+        if ($response['success']) {
+            // Membaca host dari struktur JSON terbaru Accurate
+            if (isset($response['data']['d']['database']['host'])) {
+                return rtrim($response['data']['d']['database']['host'], '/');
+            } 
+            // Fallback untuk struktur lama
+            elseif (isset($response['data']['d']['host'])) {
+                return rtrim($response['data']['d']['host'], '/');
+            }
+        }
+        
+        // Catat ke log jika gagal mendapatkan host
+        if (function_exists('logError')) {
+            logError("Gagal mendapatkan Host URL. Response: " . json_encode($response), __FILE__, __LINE__);
+        }
+        return null;
+    }
+
+    /**
+     * Menghasilkan Timestamp format WIB (Asia/Jakarta) sesuai syarat Accurate
+     */
+    private function getAccurateTimestamp() {
+        $dt = new DateTime("now", new DateTimeZone("Asia/Jakarta"));
+        return $dt->format('d/m/Y H:i:s');
+    }
+
+    /**
+     * Menghasilkan Signature menggunakan algoritma HMAC-SHA256
+     */
+    private function generateAccurateSignature($timestamp) {
+        $hash = hash_hmac('sha256', $timestamp, $this->signatureSecret, true);
+        return base64_encode($hash);
     }
     
-    /**
-     * Get current access token
-     * @return string Current access token
-     */
-    public function getCurrentAccessToken() {
-        return $this->accessToken;
-    }
-    
-    /**
-     * Get base URL for API calls
-     * @return string Base URL
-     */
     public function getBaseUrl() {
         return $this->host;
     }
     
     /**
-     * Make HTTP request to Accurate API
-     * @param string $url URL endpoint
-     * @param string $method HTTP method (GET, POST, PUT, DELETE)
-     * @param mixed $data Request data
-     * @param array $headers Additional headers
-     * @return array Response array with success, http_code, data, error
+     * Menyusun endpoint URL dan memanggil executeCurl
      */
-    private function makeRequest($url, $method = 'GET', $data = null, $headers = []) {
+    private function makeRequest($endpoint, $method = 'GET', $data = null, $headers = array()) {
+        if (!$this->host) {
+            return array(
+                'success' => false, 
+                'http_code' => 0, 
+                'data' => null, 
+                'error' => 'Host URL tidak ditemukan. Periksa API Token Anda.'
+            );
+        }
+
+        // Susun full URL secara presisi
+        $endpoint = ltrim($endpoint, '/');
+        $url = $this->host . '/' . $endpoint;
+        
+        return $this->executeCurl($url, $method, $data, $headers);
+    }
+
+    /**
+     * Eksekusi cURL dengan Injeksi Header API Token Accurate
+     */
+    private function executeCurl($url, $method = 'GET', $data = null, $customHeaders = array()) {
         $ch = curl_init();
         
-        curl_setopt_array($ch, [
+        // Generate Security Headers
+        $timestamp = $this->getAccurateTimestamp();
+        $signature = $this->generateAccurateSignature($timestamp);
+
+        $options = array(
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_FOLLOWLOCATION => true, // Mengatasi response code 308 (Redirect)
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_UNRESTRICTED_AUTH => true, // Mencegah header auth terhapus saat redirect
             CURLOPT_TIMEOUT => 30,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_USERAGENT => 'Nuansa Accurate API Client/1.0'
-        ]);
+            CURLOPT_USERAGENT => 'Nuansa Accurate API Client/2.0'
+        );
         
-        $defaultHeaders = [
-            "Accept: application/json"
-        ];
-
-        // Only add Auth and Session headers for non-OAuth requests
-        if (strpos($url, '/oauth/token') === false) {
-            $defaultHeaders[] = "Authorization: Bearer {$this->accessToken}";
-            if ($this->sessionId) {
-                $defaultHeaders[] = "X-Session-ID: {$this->sessionId}";
-            }
-        }
+        curl_setopt_array($ch, $options);
         
-        $allHeaders = array_merge($defaultHeaders, $headers);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $allHeaders);
+        $defaultHeaders = array(
+            "Accept: application/json",
+            "Authorization: Bearer " . $this->apiToken,
+            "X-Api-Timestamp: " . $timestamp,
+            "X-Api-Signature: " . $signature
+        );
         
-        switch (strtoupper($method)) {
+        $allHeaders = array_merge($defaultHeaders, $customHeaders);
+        
+        $method = strtoupper($method);
+        switch ($method) {
             case 'POST':
                 curl_setopt($ch, CURLOPT_POST, true);
                 if ($data) {
@@ -110,6 +135,7 @@ class AccurateAPI {
                         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
                     } else {
                         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                        $allHeaders[] = 'Content-Type: application/json';
                     }
                 }
                 break;
@@ -117,12 +143,19 @@ class AccurateAPI {
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
                 if ($data) {
                     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                    $allHeaders[] = 'Content-Type: application/json';
                 }
                 break;
             case 'DELETE':
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
                 break;
+            case 'GET':
+            default:
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+                break;
         }
+        
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $allHeaders);
         
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -130,17 +163,16 @@ class AccurateAPI {
         curl_close($ch);
         
         if ($error) {
-            logError("cURL Error: $error", __FILE__, __LINE__);
-            return ['success' => false, 'http_code' => 0, 'data' => null, 'error' => $error];
+            if (function_exists('logError')) logError("cURL Error: " . $error, __FILE__, __LINE__);
+            return array('success' => false, 'http_code' => 0, 'data' => null, 'error' => $error);
         }
         
         $decodedResponse = json_decode($response, true);
-        $success = $httpCode >= 200 && $httpCode < 300;
+        $success = ($httpCode >= 200 && $httpCode < 300);
         
-        if ($success && is_array($decodedResponse)) {
-            if (isset($decodedResponse['s']) && $decodedResponse['s'] === false) {
-                $success = false;
-            }
+        // Standar Accurate: HTTP 200 tapi field 's' false berarti error logika aplikasi
+        if ($success && is_array($decodedResponse) && isset($decodedResponse['s']) && $decodedResponse['s'] === false) {
+            $success = false;
         }
         
         $errorMessage = null;
@@ -152,443 +184,229 @@ class AccurateAPI {
             } elseif (is_array($decodedResponse) && isset($decodedResponse['message'])) {
                 $errorMessage = $decodedResponse['message'];
             } else {
-                $errorMessage = "HTTP $httpCode error";
+                $errorMessage = "HTTP " . $httpCode . " error";
             }
-            logError("API Error: $errorMessage (HTTP $httpCode) - URL: $url", __FILE__, __LINE__);
+            if (function_exists('logError')) logError("API Error: " . $errorMessage . " (HTTP " . $httpCode . ") - URL: " . $url, __FILE__, __LINE__);
         }
         
-        return [
+        return array(
             'success' => $success,
             'http_code' => $httpCode,
             'data' => $decodedResponse,
             'error' => $errorMessage
-           // 'raw_response' => $response
-        ];
-    }
-    
-    /**
-     * Get session information including database details
-     * @return array Session information
-     */
-    public function getSessionInfo() {
-        $databaseInfo = null;
-        $databaseList = $this->getDatabaseList();
-        if ($databaseList['success'] && isset($databaseList['data']['d'])) {
-            foreach ($databaseList['data']['d'] as $db) {
-                if ($db['id'] == $this->databaseId) {
-                    $databaseInfo = $db;
-                    break;
-                }
-                if (!$databaseInfo && !$db['expired']) {
-                    $databaseInfo = $db;
-                }
-            }
-            if (!$databaseInfo && !empty($databaseList['data']['d'])) {
-                $databaseInfo = end($databaseList['data']['d']);
-            }
-        }
-        return [
-            'access_token' => $this->accessToken,
-            'session_id' => $this->sessionId,
-            'host' => $this->host,
-            'database_id' => $this->databaseId,
-            'database_info' => $databaseInfo,
-            'database_alias' => $databaseInfo['alias'] ?? 'Unknown Database',
-            'database_expired' => $databaseInfo['expired'] ?? true,
-            'database_trial_end' => $databaseInfo['trialEnd'] ?? 'Unknown'
-        ];
-    }
-
-    /**
-     * Get access token from Accurate OAuth
-     * @param string $authCode Authorization code
-     * @return array Response from token endpoint
-     */
-    public function getAccessToken($authCode) {
-        $url = $this->authHost . '/oauth/token';
-        
-        $data = [
-            'grant_type' => 'authorization_code',
-            'code' => $authCode,
-            'redirect_uri' => OAUTH_REDIRECT_URI
-        ];
-        
-        $headers = [
-            'Content-Type: application/x-www-form-urlencoded',
-            'Authorization: Basic ' . base64_encode(OAUTH_CLIENT_ID . ':' . OAUTH_CLIENT_SECRET)
-        ];
-        
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => http_build_query($data),
-            CURLOPT_HTTPHEADER => $headers
-        ]);
-        
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            logError("cURL Error in getAccessToken: $error", __FILE__, __LINE__);
-            return ['success' => false, 'http_code' => 0, 'data' => null, 'error' => $error];
-        }
-
-        $decodedResponse = json_decode($response, true);
-        $success = $httpCode >= 200 && $httpCode < 300;
-
-        return [
-            'success' => $success,
-            'http_code' => $httpCode,
-            'data' => $decodedResponse,
-            'error' => $success ? null : ($decodedResponse['error_description'] ?? $decodedResponse['error'] ?? 'Unknown error'),
-            'raw_response' => $response
-        ];
-    }
-
-    /**
-     * Refresh access token
-     * @param string $refreshToken Refresh token
-     * @return array Response from token endpoint
-     */
-    public function refreshToken($refreshToken) {
-        $url = $this->authHost . '/oauth/token';
-        
-        $data = [
-            'grant_type' => 'refresh_token',
-            'refresh_token' => $refreshToken
-        ];
-        
-        $headers = [
-            'Content-Type: application/x-www-form-urlencoded',
-            'Authorization: Basic ' . base64_encode(OAUTH_CLIENT_ID . ':' . OAUTH_CLIENT_SECRET)
-        ];
-        
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => http_build_query($data),
-            CURLOPT_HTTPHEADER => $headers
-        ]);
-        
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            logError("cURL Error in refreshToken: $error", __FILE__, __LINE__);
-            return ['success' => false, 'http_code' => 0, 'data' => null, 'error' => $error];
-        }
-
-        $decodedResponse = json_decode($response, true);
-        $success = $httpCode >= 200 && $httpCode < 300;
-
-        return [
-            'success' => $success,
-            'http_code' => $httpCode,
-            'data' => $decodedResponse,
-            'error' => $success ? null : ($decodedResponse['error_description'] ?? $decodedResponse['error'] ?? 'Unknown error'),
-            'raw_response' => $response
-        ];
-    }
-
-    /**
-     * Update config.php with new token data
-     * @param array $tokenData Token data from OAuth response
-     * @return bool Success status
-     */
-    public function updateConfigWithNewToken($tokenData) {
-        if (!isset($tokenData['access_token'])) {
-            return false;
-        }
-        
-        $configPath = __DIR__ . '/../config/config.php';
-        $configContent = file_get_contents($configPath);
-        
-        // Update access token
-        $configContent = preg_replace(
-            "/define\('ACCURATE_ACCESS_TOKEN',\s*'[^']*'\);/",
-            "define('ACCURATE_ACCESS_TOKEN', '{$tokenData['access_token']}');",
-            $configContent
         );
-        
-        // Update refresh token if available
-        if (isset($tokenData['refresh_token'])) {
-            $configContent = preg_replace(
-                "/define\('ACCURATE_REFRESH_TOKEN',\s*'[^']*'\);/",
-                "define('ACCURATE_REFRESH_TOKEN', '{$tokenData['refresh_token']}');",
-                $configContent
-            );
-        }
-        
-        return file_put_contents($configPath, $configContent) !== false;
     }
 
-    /**
-     * Get list of databases
-     * @return array Response from API
-     */
-    public function getDatabaseList() {
-        $url = 'https://account.accurate.id/api/db-list.do';
-        return $this->makeRequest($url);
-    }
+    /* ====================================================================
+       DAFTAR ENDPOINT SPESIFIK 
+       ==================================================================== */
 
-    /**
-     * Close current session
-     * @return array Response from API
-     */
-    public function closeSession() {
-        $url = $this->host . '/accurate/api/close-session.do';
-        return $this->makeRequest($url, 'POST');
-    }
-
-    /**
-     * Open new session
-     * @return array Response from API
-     */
-    public function openSession() {
-        $url = $this->host . '/accurate/api/open-session.do';
-        return $this->makeRequest($url, 'POST');
-    }
-    /**
-     * Open database
-     * @param int $databaseId Database ID to open
-     * @return array Response from API
-     */
-    public function openDatabase($databaseId = null) {
-        // Gunakan database ID dari parameter atau default
-        if (empty($databaseId)) {
-            $databaseId = $this->databaseId;
-        }
+    public function getCustomerList($params = array(), $page = null) {
+        $endpoint = 'accurate/api/customer/list.do';
         
-        if (empty($databaseId)) {
-            return [
-                'success' => false,
-                'error' => 'Database ID is required',
-                'http_code' => 400,
-                'data' => null
-            ];
-        }
-        
-        // Gunakan endpoint yang benar dari dokumentasi (GET dengan URL parameter)
-        $url = 'https://account.accurate.id/api/open-db.do?id=' . $databaseId;
-        
-        return $this->makeRequest($url, 'GET');
-    }
-
-    public function getCustomerList($params = [], $page = null) {
-        $url = $this->host . '/accurate/api/customer/list.do';
-        
-        // Default parameters
-        $defaultParams = [
+        $defaultParams = array(
             'sp.page' => 1,
             'sp.pageSize' => 100,
             'fields' => 'id,name,no,customerNo,email,mobilePhone,phone,address,createDate,createdDate,lastUpdate,balanceList'
-        ];
+        );
         
-        // Handle backward compatibility - jika params adalah integer (limit)
         if (is_int($params) && $page !== null) {
-            $params = [
+            $params = array(
                 'sp.pageSize' => $params,
                 'sp.page' => $page
-            ];
+            );
         } elseif (!is_array($params)) {
-            $params = [];
+            $params = array();
         }
         
-        // Merge dengan params yang diberikan
         $params = array_merge($defaultParams, $params);
+        $endpoint .= '?' . http_build_query($params);
         
-        $url .= '?' . http_build_query($params);
-        
-        return $this->makeRequest($url, 'GET');
+        return $this->makeRequest($endpoint, 'GET');
     }
 
-    
     public function getCustomerDetail($customerId) {
-        // Validasi ID customer
         if (empty($customerId)) {
-            return [
-                'success' => false,
-                'message' => 'Customer ID is required',
-                'data' => null
-            ];
+            return array('success' => false, 'message' => 'Customer ID is required', 'data' => null);
         }
         
-        $url = $this->host . '/accurate/api/customer/detail.do';
+        $endpoint = 'accurate/api/customer/detail.do';
+        $params = array('id' => $customerId);
+        $endpoint .= '?' . http_build_query($params);
         
-        $params = [
-            'id' => $customerId
-        ];
-        
-        $url .= '?' . http_build_query($params);
-        
-        return $this->makeRequest($url, 'GET');
+        return $this->makeRequest($endpoint, 'GET');
     }
 
-    public function getBranchList($params = []) {
-        $url = $this->host . '/accurate/api/branch/list.do';
+    public function getBranchList($params = array()) {
+        $endpoint = 'accurate/api/branch/list.do';
         
-        // Parameter default
-        $defaultParams = [
+        $defaultParams = array(
             'sp.pageSize' => 25,
             'sp.page' => 1
-        ];
+        );
         
-        // Merge dengan parameter yang diberikan
         $queryParams = array_merge($defaultParams, $params);
         
-        // Build URL dengan query parameters
         if (!empty($queryParams)) {
-            $url .= '?' . http_build_query($queryParams);
+            $endpoint .= '?' . http_build_query($queryParams);
         }
         
-        return $this->makeRequest($url, 'GET');
+        return $this->makeRequest($endpoint, 'GET');
     }
 
-   
     public function getBranchDetail($id) {
-        $url = $this->host . '/accurate/api/branch/detail.do';
+        $endpoint = 'accurate/api/branch/detail.do';
+        $params = array('id' => $id);
+        $endpoint .= '?' . http_build_query($params);
         
-        $params = [
-            'id' => $id
-        ];
-        
-        $url .= '?' . http_build_query($params);
-        
-        return $this->makeRequest($url, 'GET');
+        return $this->makeRequest($endpoint, 'GET');
     }
 
-
-    public function getWarehouseList($params = [], $page = null) {
-        $url = $this->host . '/accurate/api/warehouse/list.do';
+    public function getWarehouseList($params = array(), $page = null) {
+        $endpoint = 'accurate/api/warehouse/list.do';
         
-        // Parameter default
-        $defaultParams = [
+        $defaultParams = array(
             'sp.pageSize' => 25,
             'sp.page' => 1
-        ];
+        );
         
-        // Handle backward compatibility - jika params adalah integer (limit)
         if (is_int($params) && $page !== null) {
-            $params = [
+            $params = array(
                 'sp.pageSize' => $params,
                 'sp.page' => $page
-            ];
+            );
         } elseif (!is_array($params)) {
-            $params = [];
+            $params = array();
         }
         
-        // Merge dengan parameter yang diberikan
         $queryParams = array_merge($defaultParams, $params);
         
-        // Build URL dengan query parameters
         if (!empty($queryParams)) {
-            $url .= '?' . http_build_query($queryParams);
+            $endpoint .= '?' . http_build_query($queryParams);
         }
         
-        return $this->makeRequest($url, 'GET');
+        return $this->makeRequest($endpoint, 'GET');
     }
 
     public function getWarehouseDetail($id) {
-        $url = $this->host . '/accurate/api/warehouse/detail.do';
+        $endpoint = 'accurate/api/warehouse/detail.do';
+        $params = array('id' => $id);
+        $endpoint .= '?' . http_build_query($params);
         
-        $params = [
-            'id' => $id
-        ];
-        
-        $url .= '?' . http_build_query($params);
-        
-        return $this->makeRequest($url, 'GET');
+        return $this->makeRequest($endpoint, 'GET');
     }
 
-
- 
-
-    public function getItemList($limit = 100, $page = 1, $filters = []) 
-    {
-        $url = $this->host . '/accurate/api/item/list.do';
-        $params = [
+    public function getItemList($limit = 100, $page = 1, $filters = array()) {
+        $endpoint = 'accurate/api/item/list.do';
+        $params = array(
             'sp.pageSize' => $limit,
             'sp.page' => $page,
-            // Tambahkan upcNo (barcode) agar tersedia di list
             'fields' => 'id,name,no,upcNo,itemType,unitPrice,availableToSell,lastUpdate,itemCategory'
-        ];
+        );
+        
         if (!empty($filters)) {
             $params = array_merge($params, $filters);
         }
-        $url .= '?' . http_build_query($params);
-        return $this->makeRequest($url);
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
     }
 
     public function getItemDetail($itemId) {
         if (empty($itemId)) {
-            return ['success' => false, 'message' => 'Item ID is required', 'data' => null];
+            return array('success' => false, 'message' => 'Item ID is required', 'data' => null);
         }
         
-        $url = $this->host . '/accurate/api/item/detail.do';
+        $endpoint = 'accurate/api/item/detail.do';
+        $params = array('id' => $itemId);
+        $endpoint .= '?' . http_build_query($params);
         
-        // Hapus parameter 'fields' untuk mendapatkan seluruh data (All Fields)
-        $params = [
-            'id' => $itemId
-        ];
-        
-        $url .= '?' . http_build_query($params);
-        return $this->makeRequest($url, 'GET');
+        return $this->makeRequest($endpoint, 'GET');
     }
 
-    public function getItemByUPC($upcNo) 
-    {
-        if (empty($upcNo)) return ['success' => false, 'message' => 'UPC No is required'];
+    public function getItemByUPC($upcNo) {
+        if (empty($upcNo)) return array('success' => false, 'message' => 'UPC No is required');
 
-        // Menggunakan endpoint sesuai gambar dokumentasi baru
-        $url = $this->host . '/accurate/api/item/search-by-no-upc.do';
+        $endpoint = 'accurate/api/item/search-by-no-upc.do';
+        $params = array('keywords' => $upcNo);
+        $endpoint .= '?' . http_build_query($params);
         
-        $params = [
-            'keywords' => $upcNo // Parameter sesuai dokumentasi gambar
-        ];
-
-        $url .= '?' . http_build_query($params);
-        return $this->makeRequest($url, 'GET');
+        return $this->makeRequest($endpoint, 'GET');
     }
 
     public function getItemStock($itemNo, $warehouseName = '') {
-        if (empty($itemNo)) return ['success' => false, 'message' => 'Nomor barang (no) diperlukan'];
+        if (empty($itemNo)) return array('success' => false, 'message' => 'Nomor barang (no) diperlukan');
 
-        $url = $this->host . '/accurate/api/item/get-stock.do';
-        $params = ['no' => $itemNo];
+        $endpoint = 'accurate/api/item/get-stock.do';
+        $params = array('no' => $itemNo);
         
-        // Jika warehouseName diisi, tambahkan ke parameter
         if (!empty($warehouseName)) {
             $params['warehouseName'] = $warehouseName;
         }
 
-        $url .= '?' . http_build_query($params);
-        return $this->makeRequest($url, 'GET');
+        $endpoint .= '?' . http_build_query($params);
+        return $this->makeRequest($endpoint, 'GET');
     }
 
-    public function getSellingPrice($params) 
-    {
-    // Validasi minimal harus ada 'no' atau 'upcNo'
+    public function getSellingPrice($params) {
         if (empty($params['no']) && empty($params['upcNo'])) {
-            return ['success' => false, 'message' => 'Nomor barang (no) atau UPC diperlukan'];
+            return array('success' => false, 'message' => 'Nomor barang (no) atau UPC diperlukan');
         }
 
-        $url = $this->host . '/accurate/api/item/get-selling-price.do';
+        $endpoint = 'accurate/api/item/get-selling-price.do';
+        $endpoint .= '?' . http_build_query($params);
         
-        // Membangun query string dari parameter yang diberikan (branchName, priceCategoryName, dll)
-        $url .= '?' . http_build_query($params);
-        
-        return $this->makeRequest($url, 'GET');
+        return $this->makeRequest($endpoint, 'GET');
     }
 
-    
-}
+    public function getPurchaseOrderList($params = array()) {
+        $endpoint = 'accurate/api/purchase-order/list.do';
+        
+        $defaultParams = array(
+            'sp.page' => 1,
+            'sp.pageSize' => 200,
+            'fields' => 'id,number,transDate,dueDate,totalAmount,status,statusName,vendor,vendor.name',
+        );
+        
+        $finalParams = array_merge($defaultParams, $params);
+        $endpoint .= '?' . http_build_query($finalParams);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
 
+    public function getPurchaseOrderDetail($purchaseOrderNumber) {
+        if (empty($purchaseOrderNumber)) {
+            return array(
+                'success' => false,
+                'message' => 'Purchase order ID / Number PO is required',
+                'data' => null
+            );
+        }
+        
+        $endpoint = 'accurate/api/purchase-order/detail.do';
+        $params = array('number' => $purchaseOrderNumber);
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
+    public function getVendorDetail($vendorId = null, $vendorNo = null) {
+        $endpoint = 'accurate/api/vendor/detail.do';
+        $params = array();
+
+        if (!empty($vendorId)) {
+            $params['id'] = $vendorId;
+        } elseif (!empty($vendorNo)) {
+            $params['vendorNo'] = $vendorNo;
+        } else {
+            return array(
+                'success' => false,
+                'error' => 'ID atau Nomor Vendor tidak boleh kosong'
+            );
+        }
+        
+        $endpoint .= '?' . http_build_query($params);
+        return $this->makeRequest($endpoint, 'GET');
+    }
+}
 ?>
