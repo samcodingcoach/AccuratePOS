@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #e8ecef;
+            color: #333;
+        }
+
+        /* Header: Fokus Input */
+        .top-bar {
+            background: #2c3e50;
+            padding: 15px;
+            color: white;
+            display: flex;
+            gap: 15px;
+        }
+
+        .input-scan {
+            flex: 1;
+            padding: 15px;
+            font-size: 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        /* Layout Utama */
+        .main-wrapper {
+            display: flex;
+            height: calc(100vh - 140px);
+            padding: 10px;
+            gap: 10px;
+        }
+
+        /* Tabel Barang */
+        .table-container {
+            flex: 3;
+            background: white;
+            border: 1px solid #ccc;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f2f2f2;
+            position: sticky;
+            top: 0;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+
+        tr.selected {
+            background-color: #d1ecf1;
+        }
+
+        /* Panel Ringkasan (Kanan) */
+        .summary-panel {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .label-val {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .grand-total {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 3px double #333;
+        }
+
+        .total-amount {
+            font-size: 42px;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: right;
+        }
+
+        /* Footer: Shortcuts */
+        footer {
+            background: #fff;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-top: 1px solid #ccc;
+            gap: 20px;
+        }
+
+        .shortcut {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .shortcut b {
+            color: #d35400;
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        .btn-pay {
+            margin-left: auto;
+            background: #27ae60;
+            color: white;
+            padding: 10px 40px;
+            border: none;
+            border-radius: 5px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <input type="text" class="input-scan" placeholder="SCAN BARCODE ATAU KETIK NAMA BARANG..." autofocus>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="50">NO</th>
+                        <th>NAMA BARANG</th>
+                        <th width="80">QTY</th>
+                        <th width="120">HARGA</th>
+                        <th width="150">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>MINYAK GORENG SANIA 2L</td>
+                        <td>1</td>
+                        <td>35.000</td>
+                        <td>35.000</td>
+                    </tr>
+                    <tr class="selected">
+                        <td>2</td>
+                        <td>MIE INSTAN INDOMIE GORENG</td>
+                        <td>10</td>
+                        <td>3.100</td>
+                        <td>31.000</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>GULA PASIR 1KG</td>
+                        <td>2</td>
+                        <td>17.500</td>
+                        <td>35.000</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>SABUN MANDI CAIR REFILL</td>
+                        <td>1</td>
+                        <td>22.000</td>
+                        <td>22.000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary-panel">
+            <div class="label-val"><span>Total Item:</span> <b>14</b></div>
+            <div class="label-val"><span>Subtotal:</span> <b>123.000</b></div>
+            <div class="label-val"><span>Pajak (11%):</span> <b>13.530</b></div>
+
+            <div class="grand-total">
+                <div style="font-size: 14px; color: #7f8c8d;">TOTAL AKHIR</div>
+                <div class="total-amount">136.530</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="shortcut"><b>F2</b> Ganti Qty</div>
+        <div class="shortcut"><b>F3</b> Hapus Baris</div>
+        <div class="shortcut"><b>F4</b> Diskon</div>
+        <div class="shortcut"><b>F10</b> Batal</div>
+        <button class="btn-pay">BAYAR (F12)</button>
+    </footer>
+
+    <script>
+        // Contoh sederhana autofokus kembali ke input scan setelah klik apapun
+        document.addEventListener('click', () => {
+            document.querySelector('.input-scan').focus();
+        });
+    </script>
+
+</body>
+
+</html>

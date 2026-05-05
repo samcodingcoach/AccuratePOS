@@ -468,5 +468,63 @@ class AccurateAPI {
         
         return $this->makeRequest($endpoint, 'GET');
     }
+
+    /**
+     * Mendapatkan daftar Faktur Penjualan (Sales Invoice)
+     * Scope: sales_invoice_view
+     */
+    public function getSalesInvoiceList($params = array(), $page = null) {
+        $endpoint = 'accurate/api/sales-invoice/list.do';
+        
+        // Parameter default yang sering dibutuhkan untuk faktur
+        $defaultParams = array(
+            'sp.pageSize' => 100,
+            'sp.page' => 1,
+            // Menampilkan ID, Nomor Faktur, Tanggal, Nama Pelanggan, Total, dan Status
+            'fields' => 'id,number,transDate,customer,customer.name,totalAmount,statusName'
+        );
+        
+        // Menangani format parameter lama (jika parameter pertama adalah integer untuk limit)
+        if (is_int($params) && $page !== null) {
+            $params = array(
+                'sp.pageSize' => $params,
+                'sp.page' => $page
+            );
+        } elseif (!is_array($params)) {
+            $params = array();
+        }
+        
+        $queryParams = array_merge($defaultParams, $params);
+        
+        if (!empty($queryParams)) {
+            $endpoint .= '?' . http_build_query($queryParams);
+        }
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
+    /**
+     * Mendapatkan detail Faktur Penjualan (Sales Invoice) berdasarkan ID atau Number
+     * Scope: sales_invoice_view
+     */
+    public function getSalesInvoiceDetail($id = null, $number = null) {
+        $endpoint = 'accurate/api/sales-invoice/detail.do';
+        $params = array();
+
+        if (!empty($id)) {
+            $params['id'] = $id;
+        } elseif (!empty($number)) {
+            $params['number'] = $number;
+        } else {
+            return array(
+                'success' => false,
+                'error' => 'ID atau Nomor Faktur tidak boleh kosong'
+            );
+        }
+        
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>
