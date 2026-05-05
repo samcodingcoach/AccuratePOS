@@ -1,10 +1,45 @@
 <?php
 /**
  * File: config/config.php
+ * Deskripsi: Konfigurasi sistem dan pengambilan kredensial API dari database
  */
 
-define('ACCURATE_APP_KEY', 'd1a88155-a228-4570-92da-92aacd87866f');
-define('ACCURATE_SIGNATURE_SECRET', '3mOdcD1gBl9fe7K7hq0VwOahTbf1KKsaFUTQ8fuBXrwFxTH9vvth1869meGKNS9T');
-define('ACCURATE_API_TOKEN', 'aat.NTA.eyJ2IjoxLCJ1Ijo5MjY2MzYsImQiOjI2NDA3NjksImFpIjo2ODcyMCwiYWsiOiJkMWE4ODE1NS1hMjI4LTQ1NzAtOTJkYS05MmFhY2Q4Nzg2NmYiLCJhbiI6IkFQSV9QT1MiLCJhcCI6IjQ5ZmI4YTQ2LTc1NzEtNDgzZS1iOWRiLTM4ZWQ4OWQ1YjE0NCIsInQiOjE3Nzc5NDc4MjU0NTR9.EYzZRKvh6znPwbjxqqS4i/WPHo1pFLiMHyf9Pqpv1h/6rfj3Wucca348+seJofaUFWuIRdNAC75/lyiVfNagpVgsDD7zvoUdQGzCkkm8JDIpzH/zzhXH+ZNuwf/Diosjj4Kvnvy+P+8jBY41NJYyU2PuVSjCTOG3mFtcPX9LWZU+7mWXSyqpz3bry18AQqNA2rdG+qB8BGs=.jJkT5kBRrM8kzVxlnMwIWa1gWE7h2Ifm3EC2OvZdC8M');
+// 1. Panggil file koneksi database
+// Karena koneksi.php ada di luar folder config, kita gunakan __DIR__ . '/../'
+require_once __DIR__ . '/koneksi.php';
 
+// Pastikan kita mengambil variabel $conn dari file koneksi.php
+global $conn; 
+
+if (isset($conn)) {
+    // 2. Query Mengambil Konfigurasi Accurate yang Aktif (aktif = 1)
+    $query_config = "SELECT app_key, signature_secret, api_token FROM configs WHERE aktif = 1 ORDER BY id_config DESC LIMIT 1";
+    
+    // Menjalankan query menggunakan $conn
+    $result_config = $conn->query($query_config);
+
+    if ($result_config && $result_config->num_rows > 0) {
+        // Jika data ditemukan di database
+        $row = $result_config->fetch_assoc();
+        
+        define('ACCURATE_APP_KEY', $row['app_key']);
+        define('ACCURATE_SIGNATURE_SECRET', $row['signature_secret']);
+        define('ACCURATE_API_TOKEN', $row['api_token']);
+    } else {
+        // Fallback keamanan jika tabel kosong atau tidak ada yang aktif
+        define('ACCURATE_APP_KEY', '');
+        define('ACCURATE_SIGNATURE_SECRET', '');
+        define('ACCURATE_API_TOKEN', '');
+    }
+} else {
+    // Fallback jika file koneksi.php tidak ditemukan atau gagal dimuat
+    define('ACCURATE_APP_KEY', '');
+    define('ACCURATE_SIGNATURE_SECRET', '');
+    define('ACCURATE_API_TOKEN', '');
+    
+    // (Opsional) Catat error ke sistem log Anda
+    if (function_exists('logError')) {
+        logError("File konfigurasi gagal dijalankan karena variabel \$conn dari database tidak ditemukan.", __FILE__, __LINE__);
+    }
+}
 ?>
