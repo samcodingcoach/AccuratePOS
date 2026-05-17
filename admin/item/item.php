@@ -12,7 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // Ambil data cookie selagi session masih terbuka
 $sessionCookie = isset($_COOKIE['PHPSESSID']) ? $_COOKIE['PHPSESSID'] : '';
 
-// JALAN KELUAR: Segera tutup kunci file session agar tidak terjadi deadlock saat cURL menembak API
+// JALAN KELUAR: Segera tutup kunci file session agar tidak terjadi deadlock saat cURL menembak list-lokal.php
 session_write_close();
 
 // 2. Ambil parameter dari URL browser (set default jika tidak ada)
@@ -45,7 +45,7 @@ $errorMessage = '';
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $apiUrlWithParams);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+curl_setopt($ch, CURLOPT_TIMEOUT, 15); // Naikkan timeout sedikit menjadi 15 detik demi kestabilan
 
 // Teruskan session yang tadi sudah disimpan variabelnya
 if ($sessionCookie !== '') {
@@ -66,6 +66,11 @@ if (curl_errno($ch)) {
     }
 }
 curl_close($ch);
+
+// 5. BUKA KEMBALI SESSION DI SINI: Agar flash message import_flash di bawah tetap terbaca dengan normal
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
