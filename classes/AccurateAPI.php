@@ -348,6 +348,27 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
+    public function getListStock($warehouseName = '', $limit = 100, $page = 1) {
+        // Inisialisasi variabel params agar aman dari Undefined Variable Error
+        $params = array();
+
+        // Menyusun parameter subset data per halaman & pengurutan sesuai dokumentasi sp
+        $params['sp.pageSize'] = $limit;
+        $params['sp.page']     = $page;
+        $params['sp.sort'] = 'name|asc'; // Nama A-Z, Kuantitas paling sedikit
+
+        $endpoint = 'accurate/api/item/list-stock.do';
+        
+        if (!empty($warehouseName)) {
+            $params['warehouseName'] = $warehouseName;
+        }
+
+        // Gabungkan seluruh parameter query string
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
     public function getSellingPrice($params) {
         if (empty($params['no']) && empty($params['upcNo'])) {
             return array('success' => false, 'message' => 'Nomor barang (no) atau UPC diperlukan');

@@ -71,6 +71,34 @@ curl_close($ch);
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+/**
+ * FUNGSI HELPER FORMAT TANGGAL LAST SYNC
+ * Jika hari ini: "Today, 16:25"
+ * Jika lewat hari: "17 Mei 2026 16:25"
+ */
+function formatLastSync($datetimeStr) {
+    if (empty($datetimeStr) || $datetimeStr === '-') return '-';
+    
+    $timestamp = strtotime($datetimeStr);
+    if (!$timestamp) return htmlspecialchars($datetimeStr);
+
+    $datePart = date('Y-m-d', $timestamp);
+    $todayPart = date('Y-m-d');
+
+    // Array nama bulan Indonesia
+    $months = [
+        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    if ($datePart === $todayPart) {
+        return 'Today, ' . date('H:i', $timestamp);
+    } else {
+        $mNum = (int)date('n', $timestamp);
+        return date('j', $timestamp) . ' ' . $months[$mNum] . ' ' . date('Y H:i', $timestamp);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -147,33 +175,43 @@ if (session_status() === PHP_SESSION_NONE) {
         <thead>
             <tr style="background-color: #f2f2f2;">
                 <th>No</th>
-                <th>ID</th>
                 <th>Item No</th>
-                <th>Nama Barang</th>
                 <th>Barcode</th>
+                <th>Nama Barang</th>
                 <th>Harga</th>
-                <th>Stok (Balance)</th>
-                <th>User ID</th>
+                <th>Stok</th>
                 <th>Last Sync</th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($items)): ?>
                 <tr>
-                    <td colspan="9" align="center">Data tidak ditemukan atau kosong.</td>
+                    <td colspan="7" align="center">Data tidak ditemukan atau kosong.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($items as $item): ?>
                     <tr>
                         <td align="center"><?php echo $rowNumber++; ?></td>
-                        <td><?php echo $item['id']; ?></td>
+                        
                         <td><?php echo htmlspecialchars($item['item_no'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($item['name'] ?? ''); ?></td>
+                        
                         <td><?php echo htmlspecialchars($item['barcode'] ?? ''); ?></td>
+                        
+                        <td>
+                            <?php if (!empty($item['image'])): ?>
+                                <a href="https://odin.accurate.id/<?php echo ltrim($item['image'], '/'); ?>" target="_blank" style="text-decoration: none; color: #0066cc; font-weight: 500;">
+                                    <?php echo htmlspecialchars($item['name'] ?? ''); ?> 🖼️
+                                </a>
+                            <?php else: ?>
+                                <?php echo htmlspecialchars($item['name'] ?? ''); ?>
+                            <?php endif; ?>
+                        </td>
+                        
                         <td align="right"><?php echo number_format($item['price'] ?? 0, 0, ',', '.'); ?></td>
+                        
                         <td align="center"><?php echo number_format($item['balance'] ?? 0, 0, ',', '.'); ?></td>
-                        <td align="center"><?php echo $item['id_users'] ?? '-'; ?></td>
-                        <td><?php echo $item['last_sync'] ?? '-'; ?></td>
+                        
+                        <td align="center"><?php echo formatLastSync($item['last_sync'] ?? ''); ?></td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

@@ -1,3 +1,35 @@
 [2026-05-05 10:40:35] Error in /var/www/html/pos-accurate/api/branch/list.php on line 92: Branch API Error: Gagal mengambil daftar branch
 [2026-05-05 10:45:59] Error in /var/www/html/pos-accurate/api/branch/list.php on line 92: Branch API Error: Gagal mengambil daftar branch
 [2026-05-05 16:35:50] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: customerNo harus diisi (HTTP 200) - URL: https://odin.accurate.id/accurate/api/sales-invoice/detail-invoice.do?sp.pageSize=100&sp.page=1
+[2026-05-17 18:06:51] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Upsss... Telah terjadi permasalahan pada saat pemrosesan aktivitas Anda. Permasalahan ini sudah kami terima secara otomatis, dan akan segera ditelusuri oleh tim terkait. Kami mohon maaf atas ketidaknyamanan yang terjadi.
+
+Kode Referensi:
+ersen-242-580a080a09f57bc824cc6a2f97561c50 (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/list-stock.do?sp.pageSize=100&sp.page=1&sp.sort=quantity%7Casc%3Bname%7Casc
+[2026-05-17 18:07:04] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Upsss... Telah terjadi permasalahan pada saat pemrosesan aktivitas Anda. Permasalahan ini sudah kami terima secara otomatis, dan akan segera ditelusuri oleh tim terkait. Kami mohon maaf atas ketidaknyamanan yang terjadi.
+
+Kode Referensi:
+ersen-257-1149ce75e51a377c6cc4ace7342ff89e (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/list-stock.do?sp.pageSize=100&sp.page=1&sp.sort=quantity%7Casc%3Bname%7Casc
+[2026-05-17 18:07:07] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Upsss... Telah terjadi permasalahan pada saat pemrosesan aktivitas Anda. Permasalahan ini sudah kami terima secara otomatis, dan akan segera ditelusuri oleh tim terkait. Kami mohon maaf atas ketidaknyamanan yang terjadi.
+
+Kode Referensi:
+ersen-182-24b09abcaf56805931fd9adb73c9ccd6 (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/list-stock.do?sp.pageSize=100&sp.page=1&sp.sort=quantity%7Casc%3Bname%7Casc
+[2026-05-17 18:08:31] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Upsss... Telah terjadi permasalahan pada saat pemrosesan aktivitas Anda. Permasalahan ini sudah kami terima secara otomatis, dan akan segera ditelusuri oleh tim terkait. Kami mohon maaf atas ketidaknyamanan yang terjadi.
+
+Kode Referensi:
+ersen-282-be276bc306888f36eb1f73f7d29a93ab (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/list-stock.do?sp.pageSize=100&sp.page=1&sp.sort=quantity%7Casc
+[2026-05-17 18:09:05] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Upsss... Telah terjadi permasalahan pada saat pemrosesan aktivitas Anda. Permasalahan ini sudah kami terima secara otomatis, dan akan segera ditelusuri oleh tim terkait. Kami mohon maaf atas ketidaknyamanan yang terjadi.
+
+Kode Referensi:
+ersen-421-da5c0e4526228b89c1466e4093c6b53a (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/list-stock.do?sp.pageSize=100&sp.page=1&sp.sort=quantity%7Casc
+[2026-05-17 18:09:35] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Upsss... Telah terjadi permasalahan pada saat pemrosesan aktivitas Anda. Permasalahan ini sudah kami terima secara otomatis, dan akan segera ditelusuri oleh tim terkait. Kami mohon maaf atas ketidaknyamanan yang terjadi.
+
+Kode Referensi:
+ersen-24668-a7bd1ad52ad34b6ed92466a11d60a69c (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/list-stock.do?sp.pageSize=100&sp.page=1&sp.sort=quantity%7Casc%3B
+[2026-05-17 18:10:43] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Upsss... Telah terjadi permasalahan pada saat pemrosesan aktivitas Anda. Permasalahan ini sudah kami terima secara otomatis, dan akan segera ditelusuri oleh tim terkait. Kami mohon maaf atas ketidaknyamanan yang terjadi.
+
+Kode Referensi:
+ersen-545-2d7b87de2e246373f66ce3e758aae861 (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/list-stock.do?sp.pageSize=100&sp.page=1&sp.sort=quantity%7Cdesc%3B
+[2026-05-17 18:12:29] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Upsss... Telah terjadi permasalahan pada saat pemrosesan aktivitas Anda. Permasalahan ini sudah kami terima secara otomatis, dan akan segera ditelusuri oleh tim terkait. Kami mohon maaf atas ketidaknyamanan yang terjadi.
+
+Kode Referensi:
+ersen-205-68d7c38f997c6318a43f9fcc81cdb13b (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/list-stock.do?sp.pageSize=100&sp.page=1&sp.sort=name%7Casc%3B
