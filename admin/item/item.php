@@ -77,6 +77,27 @@ curl_close($ch);
 
     <h1>Daftar Barang</h1>
 
+    <?php 
+        if (isset($_SESSION['import_flash'])): 
+            $flash = $_SESSION['import_flash'];
+            $bgColor = ($flash['type'] === 'success') ? '#e2f0d9' : '#fce4d6';
+            $borderColor = ($flash['type'] === 'success') ? '#385723' : '#c65911';
+        ?>
+            <div style="background-color: <?php echo $bgColor; ?>; border: 1px solid <?php echo $borderColor; ?>; padding: 10px; margin-bottom: 15px;">
+                <p style="margin: 0;"><?php echo $flash['message']; ?></p>
+                <?php if (!empty($flash['errors'])): ?>
+                    <ul style="margin: 5px 0 0 0; font-size: 12px; color: red;">
+                        <?php foreach ($flash['errors'] as $err): ?>
+                            <li><?php echo htmlspecialchars($err); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </div>
+        <?php 
+            unset($_SESSION['import_flash']); // Hapus notifikasi setelah ditampilkan sekali
+        endif; 
+    ?>
+
     <fieldset style="margin-bottom: 20px; padding: 15px;">
         <legend>Panel Pencarian & Filter</legend>
         <form method="GET" action="">
@@ -94,6 +115,8 @@ curl_close($ch);
             &nbsp;&nbsp;
             <button type="submit">Cari Data</button>
             <a href="item.php"><button type="button">Reset</button></a>
+            
+            <button type="button" onclick="if(confirm('Mulai import data dari Accurate sesuai filter tanggal?')) window.location.href='import-accurate.php?<?php echo http_build_query(['start_date' => $startDate, 'end_date' => $endDate]); ?>'">Import Accurate</button>
         </form>
     </fieldset>
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * API ITEM LIST - LIGHT VERSION (Optimized)
+ * API ITEM LIST - LIGHT VERSION (Optimized with Date Filter)
  * File: api/item/list.php
  */
 
@@ -20,13 +20,34 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 try {
     $api = new AccurateAPI();
 
-    $limit = isset($_GET['limit']) ? max(1, min(50, (int)$_GET['limit'])) : 20;
+    // Diubah max limit-nya ke 250 agar klop dengan kebutuhan mass-import
+    $limit = isset($_GET['limit']) ? max(1, min(250, (int)$_GET['limit'])) : 20;
     $page  = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 
-    $result = $api->getItemList($limit, $page);
+    // 1. Tangkap parameter rentang tanggal dari request URL
+    $startDate = isset($_GET['start_date']) ? trim($_GET['start_date']) : '';
+    $endDate   = isset($_GET['end_date']) ? trim($_GET['end_date']) : '';
+
+    $accurateFilters = [];
+
+    // 2. Jika tanggal diisi, susun filter sesuai standarisasi payload Accurate API
+    if ($startDate !== '' && $endDate !== '') {
+        // Konversi format HTML (YYYY-MM-DD) ke format wajib Accurate (d/m/Y H:i:s)
+        $formattedStart = date('d/m/Y', strtotime($startDate)) . ' 00:00:00';
+        $formattedEnd   = date('d/m/Y', strtotime($endDate)) . ' 23:59:59';
+
+        $accurateFilters = [
+            'filter.lastUpdate.op'     => 'BETWEEN',
+            'filter.lastUpdate.val[0]' => $formattedStart,
+            'filter.lastUpdate.val[1]' => $formattedEnd
+        ];
+    }
+
+    // 3. Masukkan array filter ke dalam argumen ke-3 fungsi getItemList
+    $result = $api->getItemList($limit, $page, $accurateFilters);
 
     if (!$result['success']) {
-        throw new Exception($result['error'] ?? 'Gagal fetch list barang');
+        throw new Exception($result['error'] ?? 'Gagal fetch list barang dari Accurate');
     }
 
     $rawItems = $result['data']['d'] ?? [];
@@ -78,7 +99,9 @@ try {
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 } catch (Exception $e) {
-    logError("Item List Light Error: " . $e->getMessage(), __FILE__, __LINE__);
+    if (function_exists('logError')) {
+        logError("Item List Light Error: " . $e->getMessage(), __FILE__, __LINE__);
+    }
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
