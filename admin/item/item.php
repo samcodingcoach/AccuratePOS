@@ -19,8 +19,8 @@ session_write_close();
 $page       = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $limit      = 250; 
 $barcode    = isset($_GET['barcode']) ? trim($_GET['barcode']) : '';
-$startDate  = isset($_GET['start_date']) ? trim($_GET['start_date']) : '';
-$endDate    = isset($_GET['end_date']) ? trim($_GET['end_date']) : '';
+$startDate = (isset($_GET['start_date']) && trim($_GET['start_date']) !== '') ? trim($_GET['start_date']) : date('Y-m-d');
+$endDate   = (isset($_GET['end_date']) && trim($_GET['end_date']) !== '') ? trim($_GET['end_date']) : date('Y-m-d');
 
 // 3. Bangun URL query untuk menembak API lokal
 $apiBaseUrl = "http://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . "/../../api/item/list-lokal.php";
@@ -121,7 +121,19 @@ if (session_status() === PHP_SESSION_NONE) {
             <button type="submit">Cari Data</button>
             <a href="item.php"><button type="button">Reset</button></a>
             
-            <button type="button" onclick="if(confirm('Mulai import data dari Accurate sesuai filter tanggal?')) window.location.href='import-accurate.php?<?php echo http_build_query(['start_date' => $startDate, 'end_date' => $endDate]); ?>'">Import Accurate</button>
+            <button type="button" onclick="
+                if(confirm('Mulai import data dari Accurate sesuai filter tanggal?')) {
+                    let st = document.getElementById('start_date').value;
+                    let ed = document.getElementById('end_date').value;
+                    
+                    // Jika input kosong di browser, paksa ambil tanggal hari ini (WITA) via JS
+                    let today = new Date().toISOString().slice(0, 10);
+                    if(!st) st = today;
+                    if(!ed) ed = today;
+                    
+                    window.location.href='import-accurate.php?start_date=' + st + '&end_date=' + ed;
+                }
+            ">Import Accurate</button>
         </form>
     </fieldset>
 
