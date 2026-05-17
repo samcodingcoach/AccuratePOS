@@ -169,12 +169,18 @@ function formatLastSync($datetimeStr) {
         <p style="color: red; font-weight: bold;">Error: <?php echo $errorMessage; ?></p>
     <?php endif; ?>
 
+    <div style="margin-bottom: 10px; background: #f9f9f9; padding: 10px; border: 1px solid #ddd;">
+        <span style="font-weight: bold;">Multi Action Terpilih:</span> &nbsp;
+        <button type="button" onclick="prosesMultiActionDemo()">Cek Item No Terpilih</button>
+        </div>
+
     <p>Total Data Tersaring: <strong><?php echo $pagination['total_items'] ?? 0; ?></strong> item</p>
 
     <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr style="background-color: #f2f2f2;">
-                <th>No</th>
+                <th width="30"><input type="checkbox" id="check_all" onclick="toggleSelectAll(this)"></th>
+                <th width="40">No</th>
                 <th>Item No</th>
                 <th>Barcode</th>
                 <th>Nama Barang</th>
@@ -186,11 +192,15 @@ function formatLastSync($datetimeStr) {
         <tbody>
             <?php if (empty($items)): ?>
                 <tr>
-                    <td colspan="7" align="center">Data tidak ditemukan atau kosong.</td>
+                    <td colspan="8" align="center">Data tidak ditemukan atau kosong.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($items as $item): ?>
                     <tr>
+                        <td align="center">
+                            <input type="checkbox" class="item-checkbox" value="<?php echo htmlspecialchars($item['item_no'] ?? ''); ?>">
+                        </td>
+
                         <td align="center"><?php echo $rowNumber++; ?></td>
                         
                         <td><?php echo htmlspecialchars($item['item_no'] ?? ''); ?></td>
@@ -244,5 +254,53 @@ function formatLastSync($datetimeStr) {
         <?php endif; ?>
     </div>
 
+    <script>
+        /**
+         * Fungsi Check All / Uncheck All barang di tabel
+         */
+        function toggleSelectAll(master) {
+            const checkboxes = document.getElementsByClassName('item-checkbox');
+            for (let i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = master.checked;
+            }
+        }
+
+        /**
+         * Fungsi Pengumpul (Collect) Kolom Item No yang sedang dicentang
+         * @returns Array list item_no
+         */
+        function getSelectedItemNos() {
+            const checkboxes = document.getElementsByClassName('item-checkbox');
+            const selectedItemNos = [];
+            
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    // Masukkan value (item_no) yang dicentang ke dalam array array
+                    selectedItemNos.push(checkboxes[i].value);
+                }
+            }
+            return selectedItemNos;
+        }
+
+        /**
+         * Fungsi Demo Aksi untuk memvalidasi koleksi data item_no
+         */
+        function prosesMultiActionDemo() {
+            const itemNos = getSelectedItemNos();
+            
+            if (itemNos.length === 0) {
+                alert('Silakan pilih minimal satu barang terlebih dahulu!');
+                return;
+            }
+            
+            // Contoh implementasi visual pengumpulan item_no
+            alert('Berhasil mengumpulkan ' + itemNos.length + ' item_no:\n' + itemNos.join(', '));
+            
+            /* Rencana Pengembangan Lanjutan:
+               Anda bisa melempar array 'itemNos' ini via AJAX fetch POST, 
+               atau memasukkannya ke input hidden form untuk diproses di file PHP lain.
+            */
+        }
+    </script>
 </body>
 </html>

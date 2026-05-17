@@ -33,3 +33,5 @@ ersen-545-2d7b87de2e246373f66ce3e758aae861 (HTTP 200) - URL: https://odin.accura
 
 Kode Referensi:
 ersen-205-68d7c38f997c6318a43f9fcc81cdb13b (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/list-stock.do?sp.pageSize=100&sp.page=1&sp.sort=name%7Casc%3B
+[2026-05-17 18:52:01] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Missing item: no=856694 (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/get-selling-price.do?no=856694
+[2026-05-17 19:03:39] Error in /var/www/html/pos-accurate/classes/AccurateAPI.php on line 189: API Error: Barang & Jasa tidak tepat (HTTP 200) - URL: https://odin.accurate.id/accurate/api/item/get-stock.do?no=856694
