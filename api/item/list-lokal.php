@@ -6,6 +6,7 @@
  */
 
 // Load koneksi database
+require_once __DIR__ . '/../../utils/api_auth.php';
 require_once __DIR__ . '/../../config/koneksi.php';
 
 // Set header response
@@ -30,7 +31,7 @@ try {
     $offset = ($page - 1) * $limit;
 
     // 2. Ambil parameter filter tanggal & barcode
-    $startDate = isset($_GET['start_date']) ? trim($_GET['start_date']) : '';
+    $startDate = isset($_GET['start_date']) ? trim($_GET['start_date']) : ''; 
     $endDate   = isset($_GET['end_date']) ? trim($_GET['end_date']) : '';
     $barcode   = isset($_GET['barcode']) ? trim($_GET['barcode']) : '';
 
