@@ -1,6 +1,6 @@
 <?php
 /**
- * PROSES IMPORT DATA FROM ACCURATE API TO LOCAL DATABASE (Murni 6 Kolom Utama)
+ * PROSES IMPORT DATA FROM ACCURATE API TO LOCAL DATABASE (Fixed Looping & Prepared Statements)
  * File: admin/item/import-accurate.php
  */
 
@@ -9,8 +9,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Ambil session cookie sebelum ditutup
+// Ambil data session & cookie yang dibutuhkan selagi session masih terbuka
 $sessionCookie = isset($_COOKIE['PHPSESSID']) ? $_COOKIE['PHPSESSID'] : '';
+$accIdUsers    = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 1;
 
 // JALAN KELUAR: Langsung tutup session di sini agar TIDAK TERJADI DEADLOCK / LOCKING dengan cURL API lokal
 session_write_close();
@@ -33,7 +34,29 @@ $page = 1;
 $hasMore = true;
 $limit = 250; 
 
-// 4. MEKANISME LOOPING AUTO-PAGINATION: Ambil semua data berantai sampai 'has_more' = false
+// 4. SIAPKAN PREPARED STATEMENT DI LUAR LOOP AGAR TIDAK MEMBUAT ULANG BUFFER MEMORI (PHP OPTIMIZATION)
+// Statement untuk Cek Eksistensi Data
+$checkSql = "SELECT COUNT(*) as total FROM item WHERE id = ? OR item_no = ?";
+$checkStmt = $conn->prepare($checkSql);
+
+// Statement untuk Insert Data Baru
+$insertSql = "INSERT INTO item (id, item_no, name, barcode, price, balance, image, id_users) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+$insertStmt = $conn->prepare($insertSql);
+
+// Jika gagal menyiapkan statement di database, hentikan proses sejak awal
+if (!$checkStmt || !$insertStmt) {
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    $_SESSION['import_flash'] = [
+        'type'    => 'error',
+        'message' => 'Gagal menyiapkan struktur query database lokal: ' . $conn->error
+    ];
+    $conn->close();
+    header("Location: item.php?start_date={$startDate}&end_date={$endDate}");
+    exit;
+}
+
+// 5. MEKANISME LOOPING AUTO-PAGINATION: Ambil semua data berantai
 while ($hasMore) {
     
     $queryParams = http_build_query([
@@ -71,7 +94,7 @@ while ($hasMore) {
             break;
         }
 
-        // 5. Looping data barang (Hanya memproses 6 kolom utama pilihan Anda)
+        // 6. Looping data barang hasil fetch
         foreach ($accurateItems as $item) {
             $accId       = (int)$item['id'];
             $accItemNo   = trim($item['item_no']);
@@ -79,56 +102,41 @@ while ($hasMore) {
             $accBarcode  = isset($item['barcode']) ? trim($item['barcode']) : null;
             $accPrice    = (float)($item['price'] ?? 0);   
             $accBalance  = (int)($item['balance'] ?? 0);   
+            
+            // Aturan Image: Jika dari list.php bernilai null/kosong, set ke NULL lokal
+            $accImage    = isset($item['image']) && trim($item['image']) !== '' ? trim($item['image']) : null;
 
-            // 6. Cek eksistensi data berdasarkan 'id' ATAU 'item_no' di DB lokal
-            $checkSql = "SELECT COUNT(*) as total FROM item WHERE id = ? OR item_no = ?";
-            $checkStmt = $conn->prepare($checkSql);
+            // 7. Eksekusi Cek Eksistensi Menggunakan Statement yang Sudah Ada
             $checkStmt->bind_param('is', $accId, $accItemNo);
             $checkStmt->execute();
             $isExist = $checkStmt->get_result()->fetch_assoc()['total'];
-            $checkStmt->close();
 
             if ($isExist > 0) {
+                // Skip jika data sudah ada
                 $skippedCount++;
             } else {
-                // 7. Jalankan perintah INSERT (MURNI 6 KOLOM PILIHAN ANDA, TANPA image DAN id_users)
-                $insertSql = "INSERT INTO item (id, item_no, name, barcode, price, balance) 
-                              VALUES (?, ?, ?, ?, ?, ?)";
+                // 8. Eksekusi INSERT Menggunakan Statement yang Sudah Ada
+                $insertStmt->bind_param(
+                    'isssdisi', 
+                    $accId, 
+                    $accItemNo, 
+                    $accName, 
+                    $accBarcode, 
+                    $accPrice, 
+                    $accBalance, 
+                    $accImage, 
+                    $accIdUsers
+                );
                 
-                $insertStmt = $conn->prepare($insertSql);
-                if ($insertStmt) {
-                    /**
-                     * BIND PARAM 6 PARAMETER ('isssdi'):
-                     * i = id (int)
-                     * s = item_no (string)
-                     * s = name (string)
-                     * s = barcode (string)
-                     * d = price (double)
-                     * i = balance (int)
-                     */
-                    $insertStmt->bind_param(
-                        'isssdi', 
-                        $accId, 
-                        $accItemNo, 
-                        $accName, 
-                        $accBarcode, 
-                        $accPrice, 
-                        $accBalance
-                    );
-                    
-                    if ($insertStmt->execute()) {
-                        $insertedCount++;
-                    } else {
-                        $errorMessages[] = "Gagal simpan Item No {$accItemNo}: " . $insertStmt->error;
-                    }
-                    $insertStmt->close();
+                if ($insertStmt->execute()) {
+                    $insertedCount++;
                 } else {
-                    $errorMessages[] = "Gagal menyiapkan insert statement: " . $conn->error;
+                    $errorMessages[] = "Gagal simpan Item No {$accItemNo}: " . $insertStmt->error;
                 }
             }
         }
 
-        // 8. Baca status pagination dari response JSON API
+        // Baca status pagination dari response JSON API untuk melanjutkannya ke halaman berikutnya
         $hasMore = (bool)($decodes['pagination']['has_more'] ?? false);
         if ($hasMore) {
             $page++; 
@@ -140,7 +148,11 @@ while ($hasMore) {
     }
 }
 
-// 9. Jalankan kembali session di akhir kode untuk Flash Message Notifikasi
+// 9. Tutup semua statement yang berada di luar loop setelah selesai digunakan
+$checkStmt->close();
+$insertStmt->close();
+
+// 10. Jalankan kembali session di akhir kode untuk Flash Message Notifikasi
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -153,9 +165,10 @@ if (!empty($errorMessages)) {
     $_SESSION['import_flash']['errors'] = $errorMessages;
 }
 
+// Tutup koneksi database lokal dengan aman
 $conn->close();
 
-// 10. Kembali ke halaman utama
+// 11. Kembali ke halaman utama admin
 header("Location: item.php?start_date={$startDate}&end_date={$endDate}");
 exit;
 ?>
