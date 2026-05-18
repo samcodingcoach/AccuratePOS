@@ -1,6 +1,6 @@
 <?php
 /**
- * HALAMAN ADMIN - DETAIL PRICE & STOCK INTEGRATION (AJAX Driven - Fixed Error 500)
+ * HALAMAN ADMIN - DETAIL PRICE & STOCK INTEGRATION (AJAX Driven - Fixed Text Wrap & Multi Button)
  * File: admin/item/pricestock.php
  */
 
@@ -24,15 +24,35 @@ if (empty($itemNo)) {
     <title>Admin - Update Harga & Stok</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 30px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: inline-block; width: 150px; font-weight: bold; }
-        .form-group input { padding: 6px; width: 300px; border: 1px solid #ccc; background-color: #f5f5f5; }
-        .form-group input:focus { outline: none; }
-        select { padding: 6px; width: 314px; }
-        button { padding: 8px 15px; background-color: #4CAF50; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #45a049; }
+        .form-group { margin-bottom: 15px; display: flex; align-items: flex-start; }
+        .form-group label { display: inline-block; width: 150px; font-weight: bold; margin-top: 6px; }
+        .form-group input { padding: 6px; width: 300px; border: 1px solid #ccc; background-color: #f5f5f5; box-sizing: border-box; }
+        
+        /* Style khusus Textarea agar mendukung wrap text nama barang yang panjang */
+        .form-group textarea { 
+            padding: 6px; 
+            width: 300px; 
+            height: 65px; 
+            border: 1px solid #ccc; 
+            background-color: #f5f5f5; 
+            font-family: Arial, sans-serif;
+            resize: vertical; 
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus { outline: none; }
+        select { padding: 6px; width: 300px; box-sizing: border-box; }
+        
+        /* Style Tombol Aksi */
+        .btn-container { margin-top: 20px; text-align: right; width: 450px; }
+        .btn { padding: 8px 15px; border: none; cursor: pointer; font-weight: bold; margin-left: 5px; }
+        .btn-success { background-color: #4CAF50; color: white; }
+        .btn-success:hover { background-color: #45a049; }
+        .btn-primary { background-color: #0066cc; color: white; }
+        .btn-primary:hover { background-color: #0052a3; }
+        
         .back-link { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #0066cc; }
-        #loading_status { color: #888; font-style: italic; margin-left: 10px; display: none; }
+        #loading_status { color: #888; font-style: italic; margin-left: 10px; display: none; align-self: center; }
     </style>
 </head>
 <body>
@@ -59,7 +79,7 @@ if (empty($itemNo)) {
 
         <div class="form-group">
             <label for="name">Nama Barang:</label>
-            <input type="text" id="name" readonly placeholder="Memuat nama barang...">
+            <textarea id="name" readonly placeholder="Memuat nama barang..."></textarea>
         </div>
 
         <div class="form-group">
@@ -72,13 +92,13 @@ if (empty($itemNo)) {
             <input type="text" id="availableStock" readonly placeholder="0">
         </div>
 
-        <div style="margin-top: 20px; text-align: right;">
-            <button type="button" onclick="updateStockAction()">Update Stock</button>
+        <div class="btn-container">
+            <button type="button" class="btn btn-primary" onclick="updatePriceAction()">Update Harga</button>
+            <button type="button" class="btn btn-success" onclick="updateStockAction()">Update Stock</button>
         </div>
     </fieldset>
 
     <script>
-        // PERBAIKAN: Mengganti idn_to_ascii dengan htmlspecialchars agar aman di server hosting manapun
         const itemNo = "<?php echo htmlspecialchars($itemNo, ENT_QUOTES, 'UTF-8'); ?>";
 
         function loadPriceAndStock() {
@@ -100,6 +120,7 @@ if (empty($itemNo)) {
                 .then(res => {
                     loadingText.style.display = 'none';
                     if (res.status === 'success' && res.data) {
+                        // Mengisi nilai nama barang ke textarea (otomatis melakukan wrap text jika panjang)
                         document.getElementById('name').value = res.data.name || '-';
                         document.getElementById('unitPrice').value = formatRupiah(res.data.unitPrice);
                         document.getElementById('availableStock').value = res.data.availableStock ?? 0;
@@ -114,10 +135,18 @@ if (empty($itemNo)) {
                 });
         }
 
+        // Fungsi Aksi Tombol Baru: Update Harga
+        function updatePriceAction() {
+            const currentPrice = document.getElementById('unitPrice').value;
+            const currentCategory = document.getElementById('priceCategoryName').value;
+            alert(`Aksi Sinkronisasi Harga: Memulai sinkronisasi data harga barang #${itemNo} untuk kategori [${currentCategory}]. Harga saat ini: Rp ${currentPrice}`);
+        }
+
+        // Fungsi Aksi Tombol: Update Stock
         function updateStockAction() {
             const currentStock = document.getElementById('availableStock').value;
             const currentCategory = document.getElementById('priceCategoryName').value;
-            alert(`Aksi Sinkronisasi: Memulai update data stok barang #${itemNo} untuk kategori [${currentCategory}]. Stok saat ini di Accurate: ${currentStock}`);
+            alert(`Aksi Sinkronisasi Stok: Memulai update data stok barang #${itemNo} untuk kategori [${currentCategory}]. Stok saat ini di Accurate: ${currentStock}`);
         }
 
         function formatRupiah(number) {
