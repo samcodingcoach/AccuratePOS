@@ -369,9 +369,28 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
+    /**
+     * Mendapatkan Harga Jual Barang
+     * Kondisi parameter wajib:
+     * 1. (no ATAU upcNo) 
+     * OLEH
+     * 2. (no DAN priceCategoryName)
+     */
     public function getSellingPrice($params) {
-        if (empty($params['no']) && empty($params['upcNo'])) {
-            return array('success' => false, 'message' => 'Nomor barang (no) atau UPC diperlukan');
+        $hasNo = !empty($params['no']);
+        $hasUpc = !empty($params['upcNo']);
+        $hasPriceCategory = !empty($params['priceCategoryName']);
+
+        // Validasi Dua Kondisi
+        // Kondisi 1: no dan priceCategoryName ada bersamaan
+        // Kondisi 2: upcNo ada (atau no ada tanpa priceCategoryName)
+        if (($hasNo && $hasPriceCategory) || $hasNo || $hasUpc) {
+            // Parameter sudah memenuhi salah satu dari dua kondisi yang sah, proses dilanjutkan
+        } else {
+            return array(
+                'success' => false, 
+                'message' => 'Kombinasi parameter tidak valid. Diperlukan pencarian berdasarkan: (no / upcNo) ATAU (no dan priceCategoryName)'
+            );
         }
 
         $endpoint = 'accurate/api/item/get-selling-price.do';
