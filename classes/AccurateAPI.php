@@ -570,5 +570,30 @@ class AccurateAPI {
         
         return $this->makeRequest($endpoint, 'GET');
     }
+
+
+    /**
+     * Mendapatkan detail data Penyesuaian Harga/Diskon
+     * Scope: sellingprice_adjustment_view
+     */
+    public function getSellingPriceAdjustmentDetail($id = null, $number = null) {
+        $endpoint = 'accurate/api/sellingprice-adjustment/detail.do';
+      
+        $params = array();
+
+        if (!empty($id)) {
+            $params['id'] = $id;
+        } elseif (!empty($number)) {
+            $params['number'] = $number;
+        } else {
+            return array(
+                'success' => false,
+                'error' => 'ID atau Nomor Transaksi Penyesuaian Harga tidak boleh kosong.'
+            );
+        }
+        
+        $endpoint .= '?' . http_build_query($params);
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>
