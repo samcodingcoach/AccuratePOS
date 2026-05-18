@@ -199,11 +199,62 @@ if (empty($itemNo)) {
             });
         }
 
-        // Fungsi Aksi Tombol: Update Stock (Masih Placeholder)
+        // Fungsi Aksi Tombol: Update Stok ke classes/update_stock_available_lokal.php + Paksa Kembali ke Hari Ini
         function updateStockAction() {
-            const currentStock = document.getElementById('availableStock').value;
-            const currentCategory = document.getElementById('priceCategoryName').value;
-            alert(`Aksi Sinkronisasi Stok: Memulai update data stok barang #${itemNo} untuk kategori [${currentCategory}]. Stok saat ini di Accurate: ${currentStock}`);
+            // Ambil nilai stok dari input field availableStock
+            const rawStock = document.getElementById('availableStock').value;
+            
+            if (rawStock === "" || rawStock === "Memuat...") {
+                alert("Nilai stok belum siap atau tidak valid untuk diupdate.");
+                return;
+            }
+
+            if (!confirm(`Apakah Anda yakin ingin memperbarui stok item #${itemNo} di database lokal menjadi ${rawStock} unit?`)) {
+                return;
+            }
+
+            // Path relatif menuju target pemroses backend stok
+            const targetActionUrl = '../../classes/update_stock_available_lokal.php';
+
+            // Bungkus data ke dalam FormData (mengirimkan properti 'no' dan 'stock')
+            const formData = new FormData();
+            formData.append('no', itemNo);
+            formData.append('stock', rawStock);
+
+            // Ubah teks indikator loading menjadi "Menyimpan..."
+            const loadingText = document.getElementById('loading_status');
+            loadingText.innerText = "Menyimpan...";
+            loadingText.style.display = 'inline';
+
+            fetch(targetActionUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server mengembalikan error internal (HTTP 500/404).');
+                }
+                return response.json();
+            })
+            .then(res => {
+                loadingText.style.display = 'none';
+
+                if (res.status === 'success') {
+                    alert('Sukses! ' + res.message);
+                    
+                    // Sesuai permintaan Anda: Paksa selalu kembali ke penanggalan hari ini
+                    const todayStr = '<?php echo date('Y-m-d'); ?>';
+                    window.location.href = `item.php?barcode=&start_date=${todayStr}&end_date=${todayStr}`;
+                    
+                } else {
+                    alert('Gagal memperbarui database lokal: ' + res.message);
+                }
+            })
+            .catch(error => {
+                loadingText.style.display = 'none';
+                console.error('Error updating stock:', error);
+                alert('Terjadi kesalahan jaringan atau script error saat memproses pembaruan stok.');
+            });
         }
 
         function formatRupiah(number) {
