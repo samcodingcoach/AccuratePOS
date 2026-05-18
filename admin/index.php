@@ -25,6 +25,7 @@ if (!isset($_SESSION['user_id'])) {
     
     <br><br>
     
+    <a href="item/item.php" style="color: blue; text-decoration: none; font-weight: bold;">[ Kelola Item ]</a>
     <!-- Link Logout yang mengarah ke file logout.php di luar folder admin -->
     <a href="../logout.php" style="color: red; text-decoration: none; font-weight: bold;">[ Logout ]</a>
 </body>
