@@ -106,6 +106,7 @@ if (empty($itemNo)) {
             const selectedCategory = categoryElement.value;
             const loadingText = document.getElementById('loading_status');
 
+            loadingText.innerText = "Memuat...";
             loadingText.style.display = 'inline';
 
             const apiUrl = `../../api/item/stokharga.php?no=${encodeURIComponent(itemNo)}&priceCategoryName=${encodeURIComponent(selectedCategory)}`;
@@ -120,7 +121,6 @@ if (empty($itemNo)) {
                 .then(res => {
                     loadingText.style.display = 'none';
                     if (res.status === 'success' && res.data) {
-                        // Mengisi nilai nama barang ke textarea (otomatis melakukan wrap text jika panjang)
                         document.getElementById('name').value = res.data.name || '-';
                         document.getElementById('unitPrice').value = formatRupiah(res.data.unitPrice);
                         document.getElementById('availableStock').value = res.data.availableStock ?? 0;
@@ -135,14 +135,71 @@ if (empty($itemNo)) {
                 });
         }
 
-        // Fungsi Aksi Tombol Baru: Update Harga
+        // =========================================================================
+        // PERUBAHAN UTAMA: Fungsi Aksi Kirim POST AJAX ke update_price_default_lokal.php
+        // =========================================================================
+        // Fungsi Aksi Tombol: Update Harga ke classes/update_price_default_lokal.php + Paksa Kembali ke Hari Ini
         function updatePriceAction() {
-            const currentPrice = document.getElementById('unitPrice').value;
-            const currentCategory = document.getElementById('priceCategoryName').value;
-            alert(`Aksi Sinkronisasi Harga: Memulai sinkronisasi data harga barang #${itemNo} untuk kategori [${currentCategory}]. Harga saat ini: Rp ${currentPrice}`);
+            const rawPrice = document.getElementById('unitPrice').value;
+            
+            if (!rawPrice || rawPrice === "0" || rawPrice === "Memuat...") {
+                alert("Nilai harga belum siap atau tidak valid untuk diupdate.");
+                return;
+            }
+
+            if (!confirm(`Apakah Anda yakin ingin memperbarui harga item #${itemNo} di database lokal menjadi Rp ${rawPrice}?`)) {
+                return;
+            }
+
+            // Path relatif menuju target pemroses backend
+            const targetActionUrl = '../../classes/update_price_default_lokal.php';
+
+            // Bungkus data ke dalam FormData
+            const formData = new FormData();
+            formData.append('no', itemNo);
+            formData.append('harga', rawPrice);
+
+            // Ubah teks indikator loading menjadi "Menyimpan..."
+            const loadingText = document.getElementById('loading_status');
+            loadingText.innerText = "Menyimpan...";
+            loadingText.style.display = 'inline';
+
+            fetch(targetActionUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server mengembalikan error internal (HTTP 500/404).');
+                }
+                return response.json();
+            })
+            .then(res => {
+                loadingText.style.display = 'none';
+
+                if (res.status === 'success') {
+                    alert('Sukses! ' + res.message);
+                    
+                    // =========================================================================
+                    // LOCK REDIRECT: PAKSA SELALU KEMBALI KE TANGGAL HARI INI (18 Mei 2026)
+                    // =========================================================================
+                    const todayStr = '<?php echo date('Y-m-d'); ?>';
+                    
+                    // Alihkan halaman kembali ke daftar item dengan mengunci parameter tanggal hari ini
+                    window.location.href = `item.php?barcode=&start_date=${todayStr}&end_date=${todayStr}`;
+                    
+                } else {
+                    alert('Gagal memperbarui database lokal: ' + res.message);
+                }
+            })
+            .catch(error => {
+                loadingText.style.display = 'none';
+                console.error('Error updating price:', error);
+                alert('Terjadi kesalahan jaringan atau script error saat memproses pembaruan harga.');
+            });
         }
 
-        // Fungsi Aksi Tombol: Update Stock
+        // Fungsi Aksi Tombol: Update Stock (Masih Placeholder)
         function updateStockAction() {
             const currentStock = document.getElementById('availableStock').value;
             const currentCategory = document.getElementById('priceCategoryName').value;
