@@ -203,7 +203,11 @@ function formatLastSync($datetimeStr) {
 
                         <td align="center"><?php echo $rowNumber++; ?></td>
                         
-                        <td><?php echo htmlspecialchars($item['item_no'] ?? ''); ?></td>
+                        <td>
+                            <a href="pricestock.php?no=<?php echo urlencode($item['item_no'] ?? ''); ?>&priceCategoryName=Umum" style="text-decoration: none; color: #0066cc; font-weight: bold;">
+                                <?php echo htmlspecialchars($item['item_no'] ?? ''); ?>
+                            </a>
+                        </td>
                         
                         <td><?php echo htmlspecialchars($item['barcode'] ?? ''); ?></td>
                         
