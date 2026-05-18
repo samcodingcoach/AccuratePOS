@@ -1,6 +1,6 @@
 <?php
 /**
- * API CONTROLLER - AGREGATOR STOK DAN HARGA BARANG (Fixed Warehouse Param)
+ * API CONTROLLER - AGREGATOR STOK DAN HARGA BARANG (Ditambahkan Field Name)
  * File: api/item/stokharga.php
  */
 
@@ -44,12 +44,18 @@ try {
     $priceRes = $api->getSellingPrice($priceParams);
     
     $unitPrice = 0; 
+    $itemName  = ''; // Inisialisasi variabel name barang
+    
     if ($priceRes['success'] && isset($priceRes['data'])) {
         $pData = $priceRes['data'];
+        
+        // Ekstraksi unitPrice dan name dari root object atau dari elemen 'd'
         if (isset($pData['unitPrice'])) {
             $unitPrice = (float)$pData['unitPrice'];
+            $itemName  = $pData['name'] ?? '';
         } elseif (isset($pData['d']['unitPrice'])) {
             $unitPrice = (float)$pData['d']['unitPrice'];
+            $itemName  = $pData['d']['name'] ?? '';
         }
     }
 
@@ -61,7 +67,6 @@ try {
     // ==========================================
     // HIT 2: AMBIL DATA STOK (getListStock)
     // ==========================================
-    // PERBAIKAN: Parameter pertama dikosongkan ('') agar mencari di Semua Gudang, bukan diisi $itemNo!
     $stockRes = $api->getListStock(''); 
     
     $availableStock = 0;
@@ -90,6 +95,7 @@ try {
         'message' => 'Data gabungan harga dan stok berhasil dimuat dengan jeda aman',
         'data'    => [
             'no'             => $itemNo,
+            'name'           => $itemName, // <--- Field Name Barang Baru Tersemat di Sini
             'unitPrice'      => $unitPrice,
             'availableStock' => $availableStock
         ],
