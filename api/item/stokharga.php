@@ -1,6 +1,6 @@
 <?php
 /**
- * API CONTROLLER - AGREGATOR STOK DAN HARGA BARANG (Dengan Jeda Anti-Rate Limit)
+ * API CONTROLLER - AGREGATOR STOK DAN HARGA BARANG (Fixed Warehouse Param)
  * File: api/item/stokharga.php
  */
 
@@ -36,9 +36,7 @@ try {
     // ==========================================
     // HIT 1: AMBIL DATA HARGA (getSellingPrice)
     // ==========================================
-    $priceParams = [
-        'no' => $itemNo
-    ];
+    $priceParams = ['no' => $itemNo];
     if (!empty($priceCategoryName)) {
         $priceParams['priceCategoryName'] = $priceCategoryName;
     }
@@ -47,33 +45,42 @@ try {
     
     $unitPrice = 0; 
     if ($priceRes['success'] && isset($priceRes['data'])) {
-        $unitPrice = (float)($priceRes['data']['unitPrice'] ?? 0);
+        $pData = $priceRes['data'];
+        if (isset($pData['unitPrice'])) {
+            $unitPrice = (float)$pData['unitPrice'];
+        } elseif (isset($pData['d']['unitPrice'])) {
+            $unitPrice = (float)$pData['d']['unitPrice'];
+        }
     }
 
-
     // ==========================================
-    // MEKANISME JEDA WAKTU (ANTI-RATE LIMIT)
+    // MEKANISME JEDA WAKTU 1 DETIK (ANTI-RATE LIMIT)
     // ==========================================
-    // Menunda eksekusi baris kode di bawahnya selama 1 detik setelah respons HIT 1 selesai.
     sleep(1); 
-
 
     // ==========================================
     // HIT 2: AMBIL DATA STOK (getListStock)
     // ==========================================
-    $stockRes = $api->getListStock($itemNo); 
+    // PERBAIKAN: Parameter pertama dikosongkan ('') agar mencari di Semua Gudang, bukan diisi $itemNo!
+    $stockRes = $api->getListStock(''); 
     
     $availableStock = 0;
-    if ($stockRes['success'] && isset($stockRes['data']['d'])) {
-        $itemsStockData = $stockRes['data']['d'];
+    if ($stockRes['success'] && isset($stockRes['data'])) {
+        $sData = $stockRes['data'];
         
-        if (is_array($itemsStockData)) {
-            foreach ($itemsStockData as $sItem) {
+        // Cek jika response Accurate berupa list array data ('d')
+        if (isset($sData['d']) && is_array($sData['d'])) {
+            foreach ($sData['d'] as $sItem) {
+                // Cari data barang di dalam list yang nomornya cocok dengan $itemNo
                 if (($sItem['no'] ?? '') === $itemNo || ($sItem['item_no'] ?? '') === $itemNo) {
                     $availableStock = (int)($sItem['availableStock'] ?? $sItem['quantity'] ?? 0);
                     break;
                 }
             }
+        } 
+        // Jika response ternyata berupa satu objek langsung (fallback)
+        elseif (isset($sData['availableStock'])) {
+            $availableStock = (int)$sData['availableStock'];
         }
     }
 
