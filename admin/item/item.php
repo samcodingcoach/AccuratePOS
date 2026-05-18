@@ -172,7 +172,12 @@ function formatLastSync($datetimeStr) {
     <div style="margin-bottom: 10px; background: #f9f9f9; padding: 10px; border: 1px solid #ddd;">
         <span style="font-weight: bold;">Multi Action Terpilih:</span> &nbsp;
         <button type="button" onclick="prosesMultiActionDemo()">Cek Item No Terpilih</button>
-        </div>
+        
+        <button type="button" style="background-color: #0066cc; color: white; font-weight: bold;" onclick="jalankanMultiUpdate('harga')">Multi Update Harga</button>
+        <button type="button" style="background-color: #4CAF50; color: white; font-weight: bold;" onclick="jalankanMultiUpdate('stok')">Multi Update Stok</button>
+        
+        <span id="queue_status" style="margin-left: 15px; font-weight: bold; color: #cc0000; display: none;"></span>
+    </div>
 
     <p>Total Data Tersaring: <strong><?php echo $pagination['total_items'] ?? 0; ?></strong> item</p>
 
@@ -305,6 +310,107 @@ function formatLastSync($datetimeStr) {
                atau memasukkannya ke input hidden form untuk diproses di file PHP lain.
             */
         }
+
+        /**
+         * Fungsi Pemicu Awal Multi Update Massal
+         * @param {string} tipe - 'harga' atau 'stok'
+         */
+        function jalankanMultiUpdate(tipe) {
+            const selectedItems = getSelectedItemNos(); // Ambil semua item_no yang dicentang [cite: 64]
+            
+            if (selectedItems.length === 0) {
+                alert('Silakan centang minimal satu barang terlebih dahulu!');
+                return;
+            }
+
+            if (!confirm(`Apakah Anda yakin ingin memproses update ${tipe} untuk ${selectedItems.length} item terpilih secara berurutan?`)) {
+                return;
+            }
+
+            // Tampilkan indikator status antrean di layar
+            const statusEl = document.getElementById('queue_status');
+            statusEl.style.display = 'inline';
+            
+            // Mulai jalankan antrean dari indeks ke-0
+            prosesAntreanBarang(selectedItems, 0, tipe);
+        }
+
+        /**
+         * Fungsi Recursive Queue (Memproses barang secara bergantian dengan jeda)
+         */
+        function prosesAntreanBarang(arrItemNo, index, tipe) {
+            const statusEl = document.getElementById('queue_status');
+            
+            // Kondisi Berhenti: Jika semua barang dalam array sudah selesai diproses
+            if (index >= arrItemNo.length) {
+                statusEl.innerHTML = `✨ Sukses! Selesai memproses ${arrItemNo.length} barang.`;
+                statusEl.style.color = '#4CAF50';
+                
+                alert(`Semua proses multi update ${tipe} telah selesai dilakukan!`);
+                // Ambil parameter tanggal dari URL untuk refresh halaman ke hari ini [cite: 6, 7]
+                const urlParams = new URLSearchParams(window.location.search);
+                const startDate = urlParams.get('start_date') || '<?php echo date('Y-m-d'); ?>';
+                const endDate   = urlParams.get('end_date')   || '<?php echo date('Y-m-d'); ?>';
+                window.location.href = `item.php?barcode=&start_date=${startDate}&end_date=${endDate}`;
+                return;
+            }
+
+            const currentItemNo = arrItemNo[index];
+            const nomorUrut = index + 1;
+            
+            // Update teks status di browser agar admin tahu progresnya
+            statusEl.innerHTML = `⏳ Memproses (${nomorUrut}/${arrItemNo.length}): Item #${currentItemNo}...`;
+            statusEl.style.color = '#0066cc';
+
+            // 1. Ambil data harga & stok terbaru dari Accurate Cloud terlebih dahulu via api/item/stokharga.php
+            // Kategori harga dikunci ke 'Umum' sesuai standar default halaman list barang [cite: 47]
+            const apiFetchUrl = `../../api/item/stokharga.php?no=${encodeURIComponent(currentItemNo)}&priceCategoryName=Umum`;
+
+            fetch(apiFetchUrl)
+                .then(res => res.json())
+                .then(resData => {
+                    if (resData.status !== 'success' || !resData.data) {
+                        throw new Error(resData.message || 'Gagal mengambil data dari Accurate API');
+                    }
+                    
+                    // Siapkan cetakan FormData untuk dikirim ke lokal database
+                    const formData = new FormData();
+                    formData.append('no', currentItemNo);
+
+                    let targetDbUrl = '';
+
+                    // 2. Tentukan arah file eksekusi query lokal berdasarkan tipe tombol yang diklik
+                    if (tipe === 'harga') {
+                        targetDbUrl = '../../classes/update_price_default_lokal.php';
+                        formData.append('harga', resData.data.unitPrice);
+                    } else {
+                        targetDbUrl = '../../classes/update_stock_available_lokal.php';
+                        formData.append('stock', resData.data.availableStock);
+                    }
+
+                    // 3. Tembak ke database lokal untuk melakukan UPDATE table item
+                    return fetch(targetDbUrl, { method: 'POST', body: formData });
+                })
+                .then(dbRes => dbRes.json())
+                .then(dbData => {
+                    console.log(`Item #${currentItemNo} Result:`, dbData);
+                    
+                    // 4. MEKANISME JEDA AMAN (1.5 Detik): Panggil barang berikutnya setelah jeda waktu selesai
+                    setTimeout(() => {
+                        prosesAntreanBarang(arrItemNo, index + 1, tipe);
+                    }, 1500); 
+                })
+                .catch(err => {
+                    console.error(`Gagal pada Item #${currentItemNo}:`, err);
+                    // Jika ada 1 barang error, antrean tidak macet melainkan tetap lanjut ke barang berikutnya
+                    setTimeout(() => {
+                        prosesAntreanBarang(arrItemNo, index + 1, tipe);
+                    }, 1500);
+                });
+        }
+
+
+
     </script>
 </body>
 </html>
