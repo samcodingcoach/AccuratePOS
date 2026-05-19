@@ -8,7 +8,7 @@
 require_once __DIR__ . '/../../bootstrap.php';
 
 // 2. Proteksi endpoint menggunakan file utils Dual-Auth (Wajib login / Token Mobile)
-// require_once __DIR__ . '/../../utils/api_auth.php';
+require_once __DIR__ . '/../../utils/api_auth.php';
 
 // 3. Set header agar output berupa JSON
 header('Content-Type: application/json; charset=UTF-8');
