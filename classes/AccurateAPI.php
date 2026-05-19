@@ -622,6 +622,64 @@ class AccurateAPI {
     }
 
 
+
+    /**
+     * Menyimpan atau Memperbarui Faktur Penjualan (Sales Invoice) ke Accurate Online
+     * dengan Validasi Parameter Wajib Terpusat Berurutan.
+     * @param array $data Payload data faktur sesuai dokumentasi /save.do
+     * @return array Hasil response dari Accurate API yang sudah di-decode
+     */
+    public function saveSalesInvoice($data = array()) {
+        $endpoint = 'accurate/api/sales-invoice/save.do';
+        
+        // Validasi awal: Pastikan payload berbentuk array dan tidak kosong
+        if (!is_array($data) || empty($data)) {
+            return array(
+                'success' => false,
+                'error'   => 'Payload data transaksi faktur tidak boleh kosong.'
+            );
+        }
+
+        // 1. ARAHAN PERTAMA: Cek parameter customerNo terlebih dahulu
+        if (!isset($data['customerNo']) || trim($data['customerNo']) === '') {
+            return array(
+                'success' => false,
+                'error'   => 'Parameter "customerNo" (Nomor Pelanggan) wajib diisi dan tidak boleh kosong.'
+            );
+        }
+
+        // 2. ARAHAN KEDUA: Cek struktur dan ketersediaan data detailItem (Minimal 1 data)
+        if (!isset($data['detailItem']) || !is_array($data['detailItem']) || count($data['detailItem']) < 1) {
+            return array(
+                'success' => false,
+                'error'   => 'Detail barang (detailItem) wajib diisi dan minimal harus berisi 1 data barang.'
+            );
+        }
+
+        // 3. SE LANJUTNYA: Lakukan validasi mendalam pada tiap baris di dalam detailItem
+        foreach ($data['detailItem'] as $index => $item) {
+            // Cek kode barang (itemNo)
+            if (!isset($item['itemNo']) || trim($item['itemNo']) === '') {
+                return array(
+                    'success' => false,
+                    'error'   => "Gagal memproses data. Pada detailItem indeks ke-{$index}, parameter 'itemNo' tidak boleh kosong."
+                );
+            }
+
+            // Cek harga satuan barang (unitPrice)
+            if (!isset($item['unitPrice']) || $item['unitPrice'] === '') {
+                return array(
+                    'success' => false,
+                    'error'   => "Gagal memproses data. Pada detailItem indeks ke-{$index}, parameter 'unitPrice' tidak boleh kosong."
+                );
+            }
+        }
+
+        // Jika rantai validasi di atas berurutan lolos, jalankan request POST ke Accurate Cloud
+        return $this->makeRequest($endpoint, 'POST', $data);
+    }
+
+
     /**
      * Mendapatkan detail data Penyesuaian Harga/Diskon
      * Scope: sellingprice_adjustment_view
