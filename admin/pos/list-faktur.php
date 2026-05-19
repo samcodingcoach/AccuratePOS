@@ -1,6 +1,6 @@
 <?php
 /**
- * HALAMAN ADMIN - VIEW INVOICE LIST (REVISI - CLEAN FILTER ARCHITECTURE)
+ * HALAMAN ADMIN - VIEW INVOICE LIST (REVISI - WITH TOTAL SUMMARY)
  * File: admin/pos/list-faktur.php
  */
 
@@ -14,15 +14,13 @@ session_write_close();
 
 // 1. Ambil Parameter Filter & Paging dari URL Browser
 $page       = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$limit      = 100; // Dikunci 100 item per halaman
+$limit      = 100; 
 
-// Filter penanggalan HTML5 (Default ke hari ini jika kosong)
 $startDate  = (isset($_GET['start_date']) && $_GET['start_date'] !== '') ? trim($_GET['start_date']) : date('Y-m-d');
 $endDate    = (isset($_GET['end_date']) && $_GET['end_date'] !== '') ? trim($_GET['end_date']) : date('Y-m-d');
 $search     = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 // 2. Bangun URL Query untuk Menembak API perantara
-// Parameter dikirim secara transparan, pemrosesan format ditangani oleh AccurateAPI.php
 $apiBaseUrl = "http://" . $_SERVER['HTTP_HOST'] . "/pos-accurate/api/penjualan/list-invoice.php";
 $queryParams = http_build_query([
     'page'       => $page,
@@ -38,6 +36,9 @@ $invoices = [];
 $errorMessage = '';
 $totalItems = 0;
 $totalPage = 1;
+
+// Tambahan variabel untuk menampung total jumlah uang hasil saringan halaman aktif
+$pageTotalAmount = 0; 
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $apiUrlWithParams);
@@ -60,6 +61,11 @@ if (curl_errno($ch)) {
         // Paging meta-data subset
         $totalItems = $decodes['pagination']['total_items'] ?? count($invoices);
         $totalPage  = $decodes['pagination']['total_page'] ?? max(1, ceil($totalItems / $limit));
+
+        // Hitung total dari baris data yang berhasil di-load pada halaman ini
+        foreach ($invoices as $inv) {
+            $pageTotalAmount += (float)($inv['totalAmount'] ?? 0);
+        }
     } else {
         $errorMessage = $decodes['message'] ?? 'Gagal memuat data faktur dari server API.';
     }
@@ -106,6 +112,10 @@ $rowNumber = ($page - 1) * $limit + 1;
         th { background-color: #f1f3f5; font-weight: bold; color: #495057; }
         tr:hover { background-color: #f8f9fa; }
         
+        /* Footer Table Highlight */
+        tfoot tr { background-color: #eaedf0; font-weight: bold; color: #212529; }
+        tfoot td { border-top: 2px solid #ced4da; padding: 14px 15px; }
+
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; }
         .badge-success { background-color: #d4edda; color: #155724; }
         .badge-danger { background-color: #f8d7da; color: #721c24; }
@@ -130,7 +140,6 @@ $rowNumber = ($page - 1) * $limit + 1;
 
     <div class="filter-panel">
         <form method="GET" action="" class="filter-form">
-            
             <div class="form-group">
                 <button type="button" class="btn btn-success" onclick="alert('Membuka modul formulir pembuatan faktur baru...')">Buat Faktur</button>
             </div>
@@ -207,6 +216,17 @@ $rowNumber = ($page - 1) * $limit + 1;
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
+
+            <?php if (!empty($invoices)): ?>
+            <tfoot>
+                <tr>
+                    <td colspan="6" align="right">GRAND TOTAL:</td>
+                    <td align="right" style="color: #0056b3; font-size: 15px;">
+                        Rp <?php echo number_format($pageTotalAmount, 0, ',', '.'); ?>
+                    </td>
+                </tr>
+            </tfoot>
+            <?php endif; ?>
         </table>
     </div>
 
