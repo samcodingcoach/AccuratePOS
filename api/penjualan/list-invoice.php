@@ -1,53 +1,57 @@
 <?php
 /**
- * File: api/sales-invoice/list.php
- * Deskripsi: Mengambil daftar Faktur Penjualan dari Accurate Online
+ * API ENDPOINT - LIST SALES INVOICE (DENGAN CORE FILTER GLOBAL & PROTEKSI UTILS)
+ * File: api/penjualan/list-invoice.php
  */
 
 // 1. Muat konfigurasi dan class utama
-require_once __DIR__ . '/../../bootstrap.php';
+require_once __DIR__ . '/../../bootstrap.php'; // [cite: 1]
 
-// 2. Proteksi endpoint (Wajib login)
-require_once __DIR__ . '/../../utils/api_auth.php';
+// 2. Proteksi endpoint menggunakan file utils bawaan sistem Anda (Wajib login)
+require_once __DIR__ . '/../../utils/api_auth.php'; // 
 
 // 3. Set header agar output berupa JSON
 header('Content-Type: application/json; charset=UTF-8');
 
-// Inisialisasi API
-$api = new AccurateAPI();
+try {
+    $api = new AccurateAPI();
+    
+    // Tangkap parameter dari URL Request POS (Paginasi)
+    // Kita lakukan maping pageSize dari parameter 'limit' yang dikirim oleh list-faktur.php
+    $params = $_GET;
+    if (isset($_GET['limit'])) {
+        $params['sp.pageSize'] = (int)$_GET['limit'];
+    }
 
-// Tangkap parameter dari URL (Paginasi)
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$pageSize = isset($_GET['pageSize']) ? (int)$_GET['pageSize'] : 100;
+    // Panggil fungsi getSalesInvoiceList yang sudah cerdas memilah filter di AccurateAPI.php
+    $result = $api->getSalesInvoiceList($params);
+    
+    // 4. Format dan kembalikan response mengikuti struktur internal Accurate
+    // Menggunakan pengecekan key 'success' sesuai standarisasi AccurateAPI Anda
+    if (isset($result['success']) && $result['success']) {
+        
+        // Ambil data payload 'd' dari Accurate Cloud
+        $invoiceData = $result['data']['d'] ?? $result['data'] ?? [];
 
-// Tangkap filter tambahan jika Anda ingin mencari berdasarkan tanggal atau kata kunci
-$keywords = isset($_GET['keywords']) ? $_GET['keywords'] : '';
+        echo json_encode([
+            'status' => 'success',
+            'data'   => $invoiceData
+        ], JSON_PRETTY_PRINT);
 
-$params = [
-    'sp.page' => $page,
-    'sp.pageSize' => $pageSize
-];
+    } else {
+        // Set HTTP code ke 400 (Bad Request) jika terjadi error dari Accurate Cloud
+        http_response_code(400);
+        echo json_encode([
+            'status'  => 'error',
+            'message' => isset($result['error']) ? $result['error'] : 'Gagal mengambil data Faktur Penjualan'
+        ], JSON_PRETTY_PRINT);
+    }
 
-// Jika ada pencarian kata kunci (misal: mencari nomor faktur atau nama pelanggan)
-if (!empty($keywords)) {
-    $params['keywords'] = $keywords;
-}
-
-// Panggil fungsi dari AccurateAPI.php
-$result = $api->getSalesInvoiceList($params);
-
-// Format dan kembalikan response
-if ($result['success']) {
+} catch (Exception $e) {
+    http_response_code(500);
     echo json_encode([
-        'status' => 'success',
-        'data' => $result['data']['d']
-    ], JSON_PRETTY_PRINT);
-} else {
-    // Set HTTP code ke 400 (Bad Request) jika terjadi error dari Accurate
-    http_response_code(400);
-    echo json_encode([
-        'status' => 'error',
-        'message' => $result['error'] ? $result['error'] : 'Gagal mengambil data Faktur Penjualan'
+        'status'  => 'error',
+        'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
     ], JSON_PRETTY_PRINT);
 }
 ?>

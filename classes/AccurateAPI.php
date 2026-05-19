@@ -513,28 +513,59 @@ class AccurateAPI {
      * Mendapatkan daftar Faktur Penjualan (Sales Invoice)
      * Scope: sales_invoice_view
      */
+    /**
+     * Mendapatkan Daftar Faktur Penjualan dengan Filter Global
+     * Supports: Pagination, Date Range, Invoice Number, and Customer No Search
+     */
     public function getSalesInvoiceList($params = array(), $page = null) {
         $endpoint = 'accurate/api/sales-invoice/list.do';
         
-        // Parameter default yang sering dibutuhkan untuk faktur
+        // 1. Parameter Dasar Default dari Accurate Cloud
         $defaultParams = array(
             'sp.pageSize' => 100,
-            'sp.page' => 1,
-            // Menampilkan ID, Nomor Faktur, Tanggal, Nama Pelanggan, Total, dan Status
-            'fields' => 'id,number,transDate,customer,customer.name,totalAmount,statusName'
+            'sp.page'     => 1,
+            'fields'      => 'id,number,transDate,customer,customer.name,totalAmount,statusName'
         );
         
-        // Menangani format parameter lama (jika parameter pertama adalah integer untuk limit)
+        // Handle format legacy (jika parameter pertama dikirim berupa integer pageSize)
         if (is_int($params) && $page !== null) {
             $params = array(
                 'sp.pageSize' => $params,
-                'sp.page' => $page
+                'sp.page'     => $page
             );
         } elseif (!is_array($params)) {
             $params = array();
         }
         
-        $queryParams = array_merge($defaultParams, $params);
+        // 2. OTOMATISASI FILTER GLOBAL (Translasi Kriteria POS ke Struktur API Accurate)
+        $processedFilters = array();
+
+        // A. Peta Otomatis Tanggal Awal & Akhir (Konversi internal YYYY-MM-DD ke dd/mm/yyyy)
+        if (!empty($params['start_date']) && !empty($params['end_date'])) {
+            $processedFilters['filter.transDate.op']     = 'BETWEEN';
+            $processedFilters['filter.transDate.val[0]'] = date('d/m/Y', strtotime($params['start_date']));
+            $processedFilters['filter.transDate.val[1]'] = date('d/m/Y', strtotime($params['end_date']));
+        }
+
+        // B. Peta Otomatis Kata Kunci Pencarian (Smart Keyword Switcher)
+        if (!empty($params['search'])) {
+            $keyword = trim($params['search']);
+            
+            // Deteksi cerdas: jika ada pola nomor faktur (SI.) atau murni digit angka numerik
+            if (strpos(strtoupper($keyword), 'SI.') !== false || preg_replace('/[^0-9]/', '', $keyword) === $keyword) {
+                $processedFilters['filter.number.op']  = 'EQUAL';
+                $processedFilters['filter.number.val'] = $keyword;
+            } else {
+                // Jika berbentuk string teks bebas, asumsikan sebagai pencarian Nomor Akun Pelanggan
+                $processedFilters['filter.customerNo'] = $keyword;
+            }
+        }
+
+        // C. Bersihkan parameter kustom bawaan POS agar tidak bentrok saat di-merge
+        unset($params['start_date'], $params['end_date'], $params['search']);
+
+        // 3. Satukan parameter dasar, parameter kustom murni Accurate, dan filter hasil pemrosesan
+        $queryParams = array_merge($defaultParams, $processedFilters, $params);
         
         if (!empty($queryParams)) {
             $endpoint .= '?' . http_build_query($queryParams);
