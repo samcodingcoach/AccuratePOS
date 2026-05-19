@@ -1,6 +1,6 @@
 <?php
 /**
- * HALAMAN ADMIN - VIEW INVOICE LIST (DAFTAR FAKTUR - FULL CODE WITH SESSION FIX)
+ * HALAMAN ADMIN - VIEW INVOICE LIST (REVISI - CLEAN FILTER ARCHITECTURE)
  * File: admin/pos/list-faktur.php
  */
 
@@ -8,23 +8,28 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// =========================================================================
-// PERBAIKAN: Ambil Session ID sebelum menutup session untuk mencegah deadlock cURL
-// =========================================================================
+// Ambil Session ID sebelum menutup session untuk mencegah deadlock cURL
 $sessionCookie = isset($_COOKIE['PHPSESSID']) ? $_COOKIE['PHPSESSID'] : '';
 session_write_close(); 
 
 // 1. Ambil Parameter Filter & Paging dari URL Browser
 $page       = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$limit      = 100; // Dikunci 100 item per halaman sesuai instruksi
+$limit      = 100; // Dikunci 100 item per halaman
+
+// Filter penanggalan HTML5 (Default ke hari ini jika kosong)
+$startDate  = (isset($_GET['start_date']) && $_GET['start_date'] !== '') ? trim($_GET['start_date']) : date('Y-m-d');
+$endDate    = (isset($_GET['end_date']) && $_GET['end_date'] !== '') ? trim($_GET['end_date']) : date('Y-m-d');
 $search     = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-// 2. Bangun URL Query untuk Menembak API list-invoice.php Anda
+// 2. Bangun URL Query untuk Menembak API perantara
+// Parameter dikirim secara transparan, pemrosesan format ditangani oleh AccurateAPI.php
 $apiBaseUrl = "http://" . $_SERVER['HTTP_HOST'] . "/pos-accurate/api/penjualan/list-invoice.php";
 $queryParams = http_build_query([
-    'page'  => $page,
-    'limit' => $limit,
-    'search'=> $search
+    'page'       => $page,
+    'limit'      => $limit,
+    'start_date' => $startDate,
+    'end_date'   => $endDate,
+    'search'     => $search
 ]);
 $apiUrlWithParams = $apiBaseUrl . "?" . $queryParams;
 
@@ -37,11 +42,8 @@ $totalPage = 1;
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $apiUrlWithParams);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
-// =========================================================================
-// PERBAIKAN UTAMA: Suntikkan cookie login aktif Anda ke dalam request cURL
-// =========================================================================
 if ($sessionCookie !== '') {
     curl_setopt($ch, CURLOPT_COOKIE, 'PHPSESSID=' . $sessionCookie);
 }
@@ -64,12 +66,10 @@ if (curl_errno($ch)) {
 }
 curl_close($ch);
 
-// Buka session kembali jika elemen halaman di bawahnya membutuhkan data $_SESSION login
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Set nomor urut baris di tabel berkelanjutan
 $rowNumber = ($page - 1) * $limit + 1;
 ?>
 <!DOCTYPE html>
@@ -81,16 +81,23 @@ $rowNumber = ($page - 1) * $limit + 1;
         body { font-family: Arial, sans-serif; margin: 30px; color: #333; background-color: #f8f9fa; }
         h1 { margin-bottom: 20px; font-size: 24px; color: #222; }
         
-        /* Toolbar & Filter Styling */
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .btn { padding: 8px 16px; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; text-decoration: none; display: inline-block; }
+        /* Filter Panel & Form Styling */
+        .filter-panel { background: #fff; padding: 15px; border: 1px solid #dee2e6; border-radius: 4px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.01); }
+        .filter-form { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 13px; font-weight: bold; color: #555; }
+        
+        .filter-form input[type="text"], .filter-form input[type="date"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+        .filter-form input[type="text"] { width: 280px; }
+        .filter-form input[type="date"] { width: 150px; }
+        
+        .btn { padding: 9px 16px; font-weight: bold; border: none; cursor: pointer; border-radius: 4px; text-decoration: none; font-size: 14px; display: inline-block; }
         .btn-success { background-color: #28a745; color: white; }
         .btn-success:hover { background-color: #218838; }
         .btn-primary { background-color: #0066cc; color: white; }
         .btn-primary:hover { background-color: #0052a3; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        
-        .search-box input[type="text"] { padding: 8px; width: 320px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-secondary { background-color: #6c757d; color: white; text-align: center; }
+        .btn-secondary:hover { background-color: #5a6268; }
         
         /* Table Styling */
         .table-container { background: #fff; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
@@ -99,7 +106,6 @@ $rowNumber = ($page - 1) * $limit + 1;
         th { background-color: #f1f3f5; font-weight: bold; color: #495057; }
         tr:hover { background-color: #f8f9fa; }
         
-        /* Status Badges */
         .badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block; }
         .badge-success { background-color: #d4edda; color: #155724; }
         .badge-danger { background-color: #f8d7da; color: #721c24; }
@@ -122,20 +128,33 @@ $rowNumber = ($page - 1) * $limit + 1;
         <div class="error-msg">Error: <?php echo htmlspecialchars($errorMessage); ?></div>
     <?php endif; ?>
 
-    <div class="toolbar">
-        <div>
-            <button type="button" class="btn btn-success" onclick="alert('Membuka modul formulir pembuatan faktur baru...')">Buat Faktur</button>
-        </div>
-        
-        <div class="search-box">
-            <form method="GET" action="">
-                <input type="text" id="search_input" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari No. Faktur, Tgl (dd/mm/yyyy), atau nama konsumen...">
-                <button type="submit" class="btn btn-primary" style="padding: 7px 12px;">Cari</button>
-                <?php if (!empty($search)): ?>
-                    <a href="list-faktur.php" class="btn btn-secondary" style="padding: 7px 12px;">Reset</a>
-                <?php endif; ?>
-            </form>
-        </div>
+    <div class="filter-panel">
+        <form method="GET" action="" class="filter-form">
+            
+            <div class="form-group">
+                <button type="button" class="btn btn-success" onclick="alert('Membuka modul formulir pembuatan faktur baru...')">Buat Faktur</button>
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">Dari Tanggal:</label>
+                <input type="date" id="start_date" name="start_date" value="<?php echo htmlspecialchars($startDate); ?>">
+            </div>
+
+            <div class="form-group">
+                <label for="end_date">Sampai Tanggal:</label>
+                <input type="date" id="end_date" name="end_date" value="<?php echo htmlspecialchars($endDate); ?>">
+            </div>
+
+            <div class="form-group">
+                <label for="search_input">No. Faktur / No. Konsumen:</label>
+                <input type="text" id="search_input" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Contoh: SI.2026.05.00003 atau MB002">
+            </div>
+
+            <div class="form-group" style="flex-direction: row; gap: 5px;">
+                <button type="submit" class="btn btn-primary">Saring Data</button>
+                <a href="list-faktur.php" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
     </div>
 
     <div id="multi_action_bar" class="multi-action-bar">
@@ -159,16 +178,13 @@ $rowNumber = ($page - 1) * $limit + 1;
             <tbody>
                 <?php if (empty($invoices)): ?>
                     <tr>
-                        <td colspan="7" align="center" style="color: #888; padding: 30px;">Data faktur tidak ditemukan atau kosong.</td>
+                        <td colspan="7" align="center" style="color: #888; padding: 30px;">Tidak ada data faktur yang ditemukan untuk kriteria filter ini.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($invoices as $invoice): 
-                        // Membentuk string penggabungan konsumen: {customerNo - customer.name}
                         $custNo = $invoice['customer']['customerNo'] ?? '';
                         $custName = $invoice['customer']['name'] ?? '';
                         $consumerDisplay = trim($custNo . ' - ' . $custName, ' -');
-                        
-                        // Set style warna badge status penagihan
                         $statusClass = (trim($invoice['statusName']) === 'Lunas') ? 'badge-success' : 'badge-danger';
                     ?>
                         <tr>
@@ -195,7 +211,7 @@ $rowNumber = ($page - 1) * $limit + 1;
     </div>
 
     <div class="pagination-container">
-        <p style="margin-right: 15px; font-size: 14px; color: #666;">Total Data: <strong><?php echo $totalItems; ?></strong> baris</p>
+        <p style="margin-right: 15px; font-size: 14px; color: #666;">Total Data Terfilter: <strong><?php echo $totalItems; ?></strong> baris</p>
         
         <?php if ($page > 1): 
             $prevParams = $_GET;
@@ -219,9 +235,6 @@ $rowNumber = ($page - 1) * $limit + 1;
     </div>
 
     <script>
-        /**
-         * Global Handler: Check All Checkbox di tabel
-         */
         function toggleSelectAllFaktur(master) {
             const checkboxes = document.getElementsByClassName('faktur-checkbox');
             for (let i = 0; i < checkboxes.length; i++) {
@@ -230,9 +243,6 @@ $rowNumber = ($page - 1) * $limit + 1;
             hitungDinamisCheckbox();
         }
 
-        /**
-         * Menghitung dan menampilkan Aksi Bar jika ada checkbox tercentang
-         */
         function hitungDinamisCheckbox() {
             const checkboxes = document.getElementsByClassName('faktur-checkbox');
             const actionBar = document.getElementById('multi_action_bar');
@@ -252,9 +262,6 @@ $rowNumber = ($page - 1) * $limit + 1;
             }
         }
 
-        /**
-         * Mengumpulkan ID Faktur terpilih untuk penanganan Aksi Massal Lanjutan
-         */
         function getSelectedFakturIds() {
             const checkboxes = document.getElementsByClassName('faktur-checkbox');
             const selectedIds = [];
@@ -266,12 +273,9 @@ $rowNumber = ($page - 1) * $limit + 1;
             return selectedIds;
         }
 
-        /**
-         * Aksi Demo Tombol Multi Select
-         */
         function prosesAksiMassalFaktur() {
             const ids = getSelectedFakturIds();
-            alert('Sukses mengumpulkan ' + ids.length + ' ID Faktur (Internal ID Accurate):\n\n' + ids.join(', '));
+            alert('Sukses mengumpulkan ' + ids.length + ' ID Faktur:\n\n' + ids.join(', '));
         }
     </script>
 </body>
