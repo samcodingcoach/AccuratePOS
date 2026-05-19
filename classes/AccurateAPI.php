@@ -679,6 +679,94 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'POST', $data);
     }
 
+    /**
+     * Menyimpan atau Memperbarui Penerimaan Penjualan (Sales Receipt) ke Accurate Online
+     * dengan Validasi Parameter Wajib Terpusat Berurutan.
+     * * @param array $data Payload data penerimaan sesuai dokumentasi /save.do
+     * @return array Hasil response dari Accurate API yang sudah di-decode
+     */
+    public function saveSalesReceipt($data = array()) {
+        $endpoint = 'accurate/api/sales-receipt/save.do';
+        
+        // Validasi awal: Pastikan payload berbentuk array dan tidak kosong
+        if (!is_array($data) || empty($data)) {
+            return array(
+                'success' => false,
+                'error'   => 'Payload data transaksi penerimaan tidak boleh kosong.'
+            );
+        }
+
+        // 1. STRIKT VALIDASI: Cek customerNo
+        if (!isset($data['customerNo']) || trim($data['customerNo']) === '') {
+            return array(
+                'success' => false,
+                'error'   => 'Parameter "customerNo" (Nomor Pelanggan) wajib diisi dan tidak boleh kosong.'
+            );
+        }
+
+        // 2. STRIKT VALIDASI: Cek bankNo
+        if (!isset($data['bankNo']) || trim($data['bankNo']) === '') {
+            return array(
+                'success' => false,
+                'error'   => 'Parameter "bankNo" (Nomor Akun Bank/Kas) wajib diisi dan tidak boleh kosong.'
+            );
+        }
+
+        // 3. STRIKT VALIDASI: Cek chequeAmount
+        if (!isset($data['chequeAmount']) || $data['chequeAmount'] === '') {
+            return array(
+                'success' => false,
+                'error'   => 'Parameter "chequeAmount" (Jumlah Pembayaran) wajib diisi dan tidak boleh kosong.'
+            );
+        }
+
+        // 4. STRIKT VALIDASI: Cek transDate
+        if (!isset($data['transDate']) || trim($data['transDate']) === '') {
+            return array(
+                'success' => false,
+                'error'   => 'Parameter "transDate" (Tanggal Transaksi) wajib diisi dan tidak boleh kosong.'
+            );
+        }
+
+        // 5. STRIKT VALIDASI: Cek chequeDate
+        if (!isset($data['chequeDate']) || trim($data['chequeDate']) === '') {
+            return array(
+                'success' => false,
+                'error'   => 'Parameter "chequeDate" (Tanggal Cek/Pelunasan) wajib diisi dan tidak boleh kosong.'
+            );
+        }
+
+        // 6. STRIKT VALIDASI: Cek struktur dan ketersediaan data detailInvoice (Minimal 1 data)
+        if (!isset($data['detailInvoice']) || !is_array($data['detailInvoice']) || count($data['detailInvoice']) < 1) {
+            return array(
+                'success' => false,
+                'error'   => 'Detail alokasi faktur (detailInvoice) wajib diisi dan minimal harus berisi 1 data faktur.'
+            );
+        }
+
+        // 7. STRIKT VALIDASI: Loop setiap baris alokasi faktur, pastikan invoiceNo dan paymentAmount aman
+        foreach ($data['detailInvoice'] as $index => $inv) {
+            // Cek nomor faktur (invoiceNo)
+            if (!isset($inv['invoiceNo']) || trim($inv['invoiceNo']) === '') {
+                return array(
+                    'success' => false,
+                    'error'   => "Gagal memproses data. Pada detailInvoice indeks ke-{$index}, parameter 'invoiceNo' tidak boleh kosong."
+                );
+            }
+
+            // Cek nominal bayar per faktur (paymentAmount)
+            if (!isset($inv['paymentAmount']) || $inv['paymentAmount'] === '') {
+                return array(
+                    'success' => false,
+                    'error'   => "Gagal memproses data. Pada detailInvoice indeks ke-{$index}, parameter 'paymentAmount' tidak boleh kosong."
+                );
+            }
+        }
+
+        // Jika semua lolos, jalankan request POST ke Accurate Cloud
+        return $this->makeRequest($endpoint, 'POST', $data);
+    }
+
 
     /**
      * Mendapatkan detail data Penyesuaian Harga/Diskon
