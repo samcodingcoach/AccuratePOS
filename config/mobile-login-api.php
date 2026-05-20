@@ -1,6 +1,6 @@
 <?php
 /**
- * API ENDPOINT - MOBILE LOGIN (REVISI OUTPUT JSON)
+ * API ENDPOINT - MOBILE LOGIN (REVISI OUTPUT JSON + ID_USERS)
  * File: config/mobile-login-api.php
  */
 
@@ -37,8 +37,8 @@ try {
         exit;
     }
 
-    // 5. Cek Data User
-    $sqlUser = "SELECT username, nama_lengkap, password FROM users WHERE email = ? AND aktif = 1 LIMIT 1";
+    // 5. Cek Data User (TAMBAHAN: Ambil kolom id_users)
+    $sqlUser = "SELECT id_users, username, nama_lengkap, password FROM users WHERE email = ? AND aktif = 1 LIMIT 1";
     $stmtUser = $conn->prepare($sqlUser);
     
     if (!$stmtUser) {
@@ -60,7 +60,6 @@ try {
             $tokenValid = null;
             $currentDateTime = date('Y-m-d H:i:s');
             
-            // REVISI: Tambahkan tanggal_exp pada kolom SELECT
             $sqlToken = "SELECT token_key, tanggal_exp FROM token WHERE aktif = 1 AND tanggal_exp > ? LIMIT 1";
             $stmtToken = $conn->prepare($sqlToken);
             
@@ -87,13 +86,14 @@ try {
                 exit;
             }
 
-            // 8. REVISI: Output JSON Standar Sesuai Permintaan
+            // 8. Output JSON (TAMBAHAN: id_users di dalam node data)
             http_response_code(200);
             echo json_encode([
                 'status'  => 'success',
                 'message' => 'Login Berhasil',
                 'code'    => 200,
                 'data'    => [
+                    'id_users'     => (int)$user['id_users'],
                     'username'     => $user['username'],
                     'nama_lengkap' => $user['nama_lengkap'],
                     'token_key'    => $tokenBearer,
