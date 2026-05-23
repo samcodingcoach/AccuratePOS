@@ -485,11 +485,6 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
-
-    /**
-     * Mendapatkan daftar Karyawan (Employee)
-     * Scope: employee_view
-     */
     public function getEmployeeList($params = array(), $page = null) {
         $endpoint = 'accurate/api/employee/list.do';
         
@@ -657,8 +652,6 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
-
-
     /**
      * Menyimpan atau Memperbarui Faktur Penjualan (Sales Invoice) ke Accurate Online
      * dengan Validasi Parameter Wajib Terpusat Berurutan.
@@ -803,7 +796,6 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'POST', $data);
     }
 
-
     /**
      * Mendapatkan detail data Penyesuaian Harga/Diskon
      * Scope: sellingprice_adjustment_view
@@ -825,6 +817,31 @@ class AccurateAPI {
         }
         
         $endpoint .= '?' . http_build_query($params);
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
+    public function getShipmentList($params = array(), $page = null) {
+        $endpoint = 'accurate/api/shipment/list.do';
+        
+        // Parameter default untuk paginasi
+        $defaultParams = array(
+            'sp.page' => 1,
+            'sp.pageSize' => 100
+        );
+        
+        // Format pemanggilan fungsi versi lama (limit, page)
+        if (is_int($params) && $page !== null) {
+            $params = array(
+                'sp.pageSize' => $params,
+                'sp.page' => $page
+            );
+        } elseif (!is_array($params)) {
+            $params = array();
+        }
+        
+        $params = array_merge($defaultParams, $params);
+        $endpoint .= '?' . http_build_query($params);
+        
         return $this->makeRequest($endpoint, 'GET');
     }
 }
