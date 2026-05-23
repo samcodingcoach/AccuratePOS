@@ -204,12 +204,7 @@ class AccurateAPI {
     public function getCustomerList($params = array(), $page = null) {
         $endpoint = 'accurate/api/customer/list.do';
         
-        $defaultParams = array(
-            'sp.page' => 1,
-            'sp.pageSize' => 100,
-            'fields' => 'id,name,no,customerNo,email,mobilePhone,phone,address,createDate,createdDate,lastUpdate,balanceList'
-        );
-        
+        // 1. Handle jika dipanggil dengan format pagination lama: getCustomerList($limit, $page)
         if (is_int($params) && $page !== null) {
             $params = array(
                 'sp.pageSize' => $params,
@@ -218,12 +213,53 @@ class AccurateAPI {
         } elseif (!is_array($params)) {
             $params = array();
         }
+
+        // 2. Definisikan Default Parameter & Seragamkan Output Fields di sini
+        $defaultParams = array(
+            'sp.page' => 1,
+            'sp.pageSize' => 100,
+            'fields' => 'id,name,customerNo' 
+        );
+
+        // 3. Ambil parameter filter mentah dari client jika ada
+        $search     = isset($params['search']) ? trim($params['search']) : '';
+        $customerNo = isset($params['customerNo']) ? trim($params['customerNo']) : '';
+        $name       = isset($params['name']) ? trim($params['name']) : '';
+
+        // Hapus key kustom dari array agar tidak terkirim mentah-mentah ke Accurate
+        unset($params['search'], $params['customerNo'], $params['name']);
+
+        // 4. Proses Aturan Sinkronisasi Filter khusus Accurate API
         
+        // Kondisi A: Jika mencari spesifik Nomor Pelanggan (?customerNo=MB002)
+        if (!empty($customerNo)) {
+            $params['filter.no.op'] = 'EQUAL';
+            $params['filter.no.val'] = array($customerNo); // Otomatis menjadi filter.no.val[0] saat build query
+        }
+        // Kondisi B: Jika mencari spesifik Nama Pelanggan (?name=Shopee)
+        elseif (!empty($name)) {
+            $params['filter.keywords.op'] = 'EQUAL';
+            $params['filter.keywords.val'] = $name;
+        }
+        // Kondisi C: Jika menggunakan pencarian umum pencocokan otomatis (?search=...)
+        elseif (!empty($search)) {
+            // Jika mengandung angka atau pola awalan member, gunakan filter nomor
+            if (preg_match('/[0-9]/', $search) || stripos($search, 'C.') === 0 || stripos($search, 'MB') === 0) {
+                $params['filter.no.op'] = 'EQUAL';
+                $params['filter.no.val'] = array($search);
+            } else {
+                // Jika teks murni, gunakan filter nama keywords
+                $params['filter.keywords.op'] = 'EQUAL';
+                $params['filter.keywords.val'] = $search;
+            }
+        }
+
+        // 5. Gabungkan parameter default dengan filter yang sudah dikonversi
         $params = array_merge($defaultParams, $params);
         $endpoint .= '?' . http_build_query($params);
         
         return $this->makeRequest($endpoint, 'GET');
-    }
+}
 
     public function getCustomerDetail($customerId) {
         if (empty($customerId)) {
