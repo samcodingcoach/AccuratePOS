@@ -4,16 +4,11 @@
  * File: api/penjualan/save-invoice.php
  */
 
-// 1. Muat konfigurasi dan class utama
 require_once __DIR__ . '/../../bootstrap.php';
-
-// 2. Proteksi endpoint menggunakan file utils Dual-Auth (Wajib login / Token Mobile)
 require_once __DIR__ . '/../../utils/api_auth.php';
 
-// 3. Set header agar output berupa JSON
 header('Content-Type: application/json; charset=UTF-8');
 
-// Proteksi HTTP Method: Hanya izinkan POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode([
@@ -24,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    // 4. Tangkap payload POST (Mendukung JSON Raw maupun Form-Data / x-www-form-urlencoded)
     $rawInput = file_get_contents('php://input');
     $inputData = json_decode($rawInput, true);
 
@@ -32,31 +26,25 @@ try {
         $inputData = $_POST;
     }
 
-    // 5. Normalisasi format tanggal HTML5 (YYYY-MM-DD) ke format Accurate (dd/mm/yyyy)
     if (!empty($inputData['transDate'])) {
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $inputData['transDate'])) {
             $inputData['transDate'] = date('d/m/Y', strtotime($inputData['transDate']));
         }
     } else {
-        $inputData['transDate'] = date('d/m/Y'); // Default tanggal hari ini jika kosong
+        $inputData['transDate'] = date('d/m/Y'); 
     }
 
-    // =========================================================================
-    // PERBAIKAN: Sanitasi Parameter "taxable" (Boolean)
-    // =========================================================================
     if (isset($inputData['taxable'])) {
-        // Mengonversi string "true"/"1" menjadi true, dan "false"/"0" menjadi false murni
         $inputData['taxable'] = filter_var($inputData['taxable'], FILTER_VALIDATE_BOOLEAN);
     } else {
-        $inputData['taxable'] = false; // Default false jika tidak dikirim
+        $inputData['taxable'] = false; 
     }
-    // =========================================================================
 
-    // 6. Sanitasi nilai uang/angka (Hilangkan karakter titik ribuan dari string input)
     if (isset($inputData['cashDiscount'])) {
         $inputData['cashDiscount'] = (float)str_replace('.', '', $inputData['cashDiscount']);
     }
     
+    // Sanitasi Item Barang
     if (isset($inputData['detailItem']) && is_array($inputData['detailItem'])) {
         foreach ($inputData['detailItem'] as $key => $item) {
             if (isset($item['unitPrice'])) {
@@ -69,7 +57,6 @@ try {
                 $inputData['detailItem'][$key]['itemCashDiscount'] = (float)str_replace('.', '', $item['itemCashDiscount']);
             }
             
-            // Sanitasi angka untuk Serial Number di dalam detail item jika ada
             if (isset($item['detailSerialNumber']) && is_array($item['detailSerialNumber'])) {
                 foreach ($item['detailSerialNumber'] as $snKey => $snItem) {
                     if (isset($snItem['quantity'])) {
@@ -80,11 +67,20 @@ try {
         }
     }
 
-    // 7. Kirim data ke Accurate Cloud via Core Class (Validasi terpusat berjalan di dalam sini)
+    // Sanitasi Biaya Tambahan/Lain-lain (Independen)
+    if (isset($inputData['detailExpense']) && is_array($inputData['detailExpense']) && count($inputData['detailExpense']) > 0) {
+        foreach ($inputData['detailExpense'] as $key => $expense) {
+            if (isset($expense['expenseAmount']) && trim($expense['expenseAmount']) !== '') {
+                $inputData['detailExpense'][$key]['expenseAmount'] = (float)str_replace('.', '', $expense['expenseAmount']);
+            }
+        }
+    }
+
+    // Eksekusi API
     $api = new AccurateAPI();
     $result = $api->saveSalesInvoice($inputData);
 
-    // 8. Berikan kembalian JSON Response akhir
+    // Output Kembalian
     if (isset($result['success']) && $result['success']) {
         echo json_encode([
             'status'  => 'success',

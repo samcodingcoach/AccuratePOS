@@ -652,12 +652,6 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
-    /**
-     * Menyimpan atau Memperbarui Faktur Penjualan (Sales Invoice) ke Accurate Online
-     * dengan Validasi Parameter Wajib Terpusat Berurutan.
-     * @param array $data Payload data faktur sesuai dokumentasi /save.do
-     * @return array Hasil response dari Accurate API yang sudah di-decode
-     */
     public function saveSalesInvoice($data = array()) {
         $endpoint = 'accurate/api/sales-invoice/save.do';
         
@@ -669,7 +663,7 @@ class AccurateAPI {
             );
         }
 
-        // 1. ARAHAN PERTAMA: Cek parameter customerNo terlebih dahulu
+        // 1. Cek parameter customerNo
         if (!isset($data['customerNo']) || trim($data['customerNo']) === '') {
             return array(
                 'success' => false,
@@ -677,7 +671,7 @@ class AccurateAPI {
             );
         }
 
-        // 2. ARAHAN KEDUA: Cek struktur dan ketersediaan data detailItem (Minimal 1 data)
+        // 2. Cek struktur data detailItem (Minimal 1 data)
         if (!isset($data['detailItem']) || !is_array($data['detailItem']) || count($data['detailItem']) < 1) {
             return array(
                 'success' => false,
@@ -685,26 +679,43 @@ class AccurateAPI {
             );
         }
 
-        // 3. SE LANJUTNYA: Lakukan validasi mendalam pada tiap baris di dalam detailItem
+        // 3. Validasi mendalam pada detailItem
         foreach ($data['detailItem'] as $index => $item) {
-            // Cek kode barang (itemNo)
             if (!isset($item['itemNo']) || trim($item['itemNo']) === '') {
                 return array(
                     'success' => false,
-                    'error'   => "Gagal memproses data. Pada detailItem indeks ke-{$index}, parameter 'itemNo' tidak boleh kosong."
+                    'error'   => "Gagal memproses. Pada detailItem indeks ke-{$index}, parameter 'itemNo' tidak boleh kosong."
                 );
             }
-
-            // Cek harga satuan barang (unitPrice)
             if (!isset($item['unitPrice']) || $item['unitPrice'] === '') {
                 return array(
                     'success' => false,
-                    'error'   => "Gagal memproses data. Pada detailItem indeks ke-{$index}, parameter 'unitPrice' tidak boleh kosong."
+                    'error'   => "Gagal memproses. Pada detailItem indeks ke-{$index}, parameter 'unitPrice' tidak boleh kosong."
                 );
             }
         }
 
-        // Jika rantai validasi di atas berurutan lolos, jalankan request POST ke Accurate Cloud
+        // 4. Validasi detailExpense (Berdiri sendiri untuk pendapatan/pembiayaan lain)
+        if (isset($data['detailExpense']) && is_array($data['detailExpense']) && count($data['detailExpense']) > 0) {
+            foreach ($data['detailExpense'] as $index => $expense) {
+                if (!isset($expense['accountNo']) || trim($expense['accountNo']) === '') {
+                    return array(
+                        'success' => false,
+                        'error'   => "Gagal memproses data. Pada detailExpense indeks ke-{$index}, parameter 'accountNo' wajib diisi."
+                    );
+                }
+                if (!isset($expense['expenseAmount']) || trim($expense['expenseAmount']) === '') {
+                    return array(
+                        'success' => false,
+                        'error'   => "Gagal memproses data. Pada detailExpense indeks ke-{$index}, nominal 'expenseAmount' wajib diisi."
+                    );
+                }
+            }
+        }
+
+       
+
+        // Jalankan request POST ke Accurate Cloud
         return $this->makeRequest($endpoint, 'POST', $data);
     }
 
