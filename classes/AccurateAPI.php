@@ -488,14 +488,7 @@ class AccurateAPI {
     public function getEmployeeList($params = array(), $page = null) {
         $endpoint = 'accurate/api/employee/list.do';
         
-        $defaultParams = array(
-            'sp.pageSize' => 100,
-            'sp.page' => 1,
-            // Anda bisa mengatur default fields jika diperlukan
-            // 'fields' => 'id,name,no,email,mobilePhone,position'
-        );
-        
-        // Handle backward compatibility (jika parameter pertama adalah limit/pageSize)
+        // 1. Handle backward compatibility (jika parameter pertama adalah limit/pageSize)
         if (is_int($params) && $page !== null) {
             $params = array(
                 'sp.pageSize' => $params,
@@ -504,7 +497,45 @@ class AccurateAPI {
         } elseif (!is_array($params)) {
             $params = array();
         }
+
+        // 2. Definisikan Default Parameter
+        $defaultParams = array(
+            'sp.pageSize' => 100,
+            'sp.page' => 1,
+        );
         
+        // 3. Ambil custom parameter dari request klien
+        $search = isset($params['search']) ? trim($params['search']) : '';
+        $number = isset($params['number']) ? trim($params['number']) : '';
+        $id     = isset($params['id']) ? trim($params['id']) : '';
+        $name   = isset($params['name']) ? trim($params['name']) : '';
+
+        // Hapus custom key agar tidak terkirim mentah-mentah ke server Accurate
+        unset($params['search'], $params['number'], $params['id'], $params['name']);
+
+        // ==============================================================
+        // 4. PEMETAAN FILTER: HANYA MENGGUNAKAN KEYWORDS
+        // ==============================================================
+        $keywordValue = '';
+
+        // Cek mana yang terisi, lalu jadikan sebagai keyword pencarian
+        if (!empty($number)) {
+            $keywordValue = $number;
+        } elseif (!empty($name)) {
+            $keywordValue = $name;
+        } elseif (!empty($id)) {
+            $keywordValue = $id;
+        } elseif (!empty($search)) {
+            $keywordValue = $search;
+        }
+
+        // Jika ada nilai pencarian yang valid, tembakkan ke filter keywords Accurate
+        if (!empty($keywordValue)) {
+            $params['filter.keywords.op'] = 'CONTAIN'; // Menggunakan CONTAIN untuk pencarian global
+            $params['filter.keywords.val'] = array($keywordValue);
+        }
+
+        // 5. Gabungkan parameter dan bentuk URL
         $queryParams = array_merge($defaultParams, $params);
         
         if (!empty($queryParams)) {
@@ -514,10 +545,7 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
-    /**
-     * Mendapatkan detail Karyawan (Employee) berdasarkan ID atau Number
-     * Scope: employee_view
-     */
+    
     public function getEmployeeDetail($id = null, $number = null) {
         $endpoint = 'accurate/api/employee/detail.do';
         $params = array();
@@ -540,14 +568,7 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
-    /**
-     * Mendapatkan daftar Faktur Penjualan (Sales Invoice)
-     * Scope: sales_invoice_view
-     */
-    /**
-     * Mendapatkan Daftar Faktur Penjualan dengan Filter Global
-     * Supports: Pagination, Date Range, Invoice Number, and Customer No Search
-     */
+    
     public function getSalesInvoiceList($params = array(), $page = null) {
         $endpoint = 'accurate/api/sales-invoice/list.do';
         
