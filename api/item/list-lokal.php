@@ -1,6 +1,6 @@
 <?php
 /**
- * API ITEM LIST - LOCAL VERSION (Filter Rentang Tanggal)
+ * API ITEM LIST - LOCAL VERSION (Filter Rentang Tanggal & Pencarian)
  * File: api/item/list-lokal.php
  * Path Koneksi: ../../config/koneksi.php
  */
@@ -26,14 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 try {
     // 1. Ambil dan validasi parameter pagination (Default: 250)
-    $limit = isset($_GET['limit']) ? max(1, min(500, (int)$_GET['limit'])) : 250;
-    $page  = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+    $limit  = isset($_GET['limit']) ? max(1, min(500, (int)$_GET['limit'])) : 250;
+    $page   = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
     $offset = ($page - 1) * $limit;
 
-    // 2. Ambil parameter filter tanggal & barcode
+    // 2. Ambil parameter filter tanggal, barcode, dan search
     $startDate = isset($_GET['start_date']) ? trim($_GET['start_date']) : ''; 
     $endDate   = isset($_GET['end_date']) ? trim($_GET['end_date']) : '';
     $barcode   = isset($_GET['barcode']) ? trim($_GET['barcode']) : '';
+    $search    = isset($_GET['search']) ? trim($_GET['search']) : ''; // Tambahan penangkap search
 
     // 3. Bangun Query Dinamis untuk WHERE clause
     $whereClauses = [];
@@ -45,6 +46,15 @@ try {
         $whereClauses[] = "barcode = ?";
         $bindTypes .= "s";
         $bindParams[] = $barcode;
+    }
+
+    // Filter Pencarian (Search) berdasarkan nama atau kode barang
+    if ($search !== '') {
+        $whereClauses[] = "(name LIKE ? OR item_no LIKE ?)";
+        $bindTypes .= "ss"; // Dua parameter string
+        $searchTerm = "%" . $search . "%"; 
+        $bindParams[] = $searchTerm; // Untuk nama
+        $bindParams[] = $searchTerm; // Untuk item_no
     }
 
     // Filter Rentang Tanggal pada last_sync
