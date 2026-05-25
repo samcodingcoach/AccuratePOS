@@ -1,16 +1,12 @@
 <?php
 /**
  * File: api/karyawan/list.php
- * Deskripsi: Mengambil daftar karyawan dari Accurate Online dengan fitur pencarian dinamis
+ * Deskripsi: Mengambil daftar karyawan (dengan filter keywords & salesman)
  */
 
-// 1. Muat konfigurasi dan class utama
 require_once __DIR__ . '/../../bootstrap.php';
-
-// 2. Proteksi endpoint (Hanya yang sudah login yang bisa akses)
 require_once __DIR__ . '/../../utils/api_auth.php';
 
-// 3. Set header agar output berupa JSON
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
@@ -22,10 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 try {
-    // Inisialisasi API
     $api = new AccurateAPI();
 
-    // Tangkap parameter paginasi (mendukung 'limit' maupun 'pageSize')
+    // Tangkap parameter paginasi
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : (isset($_GET['pageSize']) ? (int)$_GET['pageSize'] : 100);
     $page  = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 
@@ -34,6 +29,7 @@ try {
     $number = isset($_GET['number']) ? trim($_GET['number']) : '';
     $id     = isset($_GET['id']) ? trim($_GET['id']) : '';
     $name   = isset($_GET['name']) ? trim($_GET['name']) : '';
+    $sales  = isset($_GET['sales']) ? trim($_GET['sales']) : '';
 
     // Susun payload parameter
     $params = [
@@ -42,7 +38,8 @@ try {
         'search'      => $search,
         'number'      => $number,
         'id'          => $id,
-        'name'        => $name
+        'name'        => $name,
+        'sales'       => $sales // Lempar parameter sales ke AccurateAPI
     ];
 
     // Panggil fungsi dari AccurateAPI.php
@@ -54,7 +51,6 @@ try {
 
     $rawEmployees = $result['data']['d'] ?? [];
 
-    // Format dan kembalikan response
     echo json_encode([
         'status'     => 'success',
         'message'    => 'Data karyawan berhasil dimuat',
@@ -67,7 +63,7 @@ try {
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
 } catch (Exception $e) {
-    http_response_code(400); // 400 Bad Request
+    http_response_code(400);
     echo json_encode([
         'status'  => 'error',
         'message' => $e->getMessage()

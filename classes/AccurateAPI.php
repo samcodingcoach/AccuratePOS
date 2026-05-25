@@ -488,7 +488,7 @@ class AccurateAPI {
     public function getEmployeeList($params = array(), $page = null) {
         $endpoint = 'accurate/api/employee/list.do';
         
-        // 1. Handle backward compatibility (jika parameter pertama adalah limit/pageSize)
+        // 1. Handle backward compatibility
         if (is_int($params) && $page !== null) {
             $params = array(
                 'sp.pageSize' => $params,
@@ -509,16 +509,17 @@ class AccurateAPI {
         $number = isset($params['number']) ? trim($params['number']) : '';
         $id     = isset($params['id']) ? trim($params['id']) : '';
         $name   = isset($params['name']) ? trim($params['name']) : '';
+        $sales  = isset($params['sales']) ? trim($params['sales']) : '';
 
         // Hapus custom key agar tidak terkirim mentah-mentah ke server Accurate
-        unset($params['search'], $params['number'], $params['id'], $params['name']);
+        unset($params['search'], $params['number'], $params['id'], $params['name'], $params['sales']);
 
         // ==============================================================
-        // 4. PEMETAAN FILTER: HANYA MENGGUNAKAN KEYWORDS
+        // 4. PEMETAAN FILTER: KEYWORDS & SALESMAN
         // ==============================================================
+        
+        // A. Filter Keywords
         $keywordValue = '';
-
-        // Cek mana yang terisi, lalu jadikan sebagai keyword pencarian
         if (!empty($number)) {
             $keywordValue = $number;
         } elseif (!empty($name)) {
@@ -529,10 +530,16 @@ class AccurateAPI {
             $keywordValue = $search;
         }
 
-        // Jika ada nilai pencarian yang valid, tembakkan ke filter keywords Accurate
         if (!empty($keywordValue)) {
-            $params['filter.keywords.op'] = 'CONTAIN'; // Menggunakan CONTAIN untuk pencarian global
+            $params['filter.keywords.op'] = 'CONTAIN';
             $params['filter.keywords.val'] = array($keywordValue);
+        }
+
+        // B. Filter Boolean Salesman (true/false)
+        if ($sales === 'true' || $sales === '1' || $sales === true) {
+            $params['filter.salesman'] = 'true';
+        } elseif ($sales === 'false' || $sales === '0' || $sales === false) {
+            $params['filter.salesman'] = 'false';
         }
 
         // 5. Gabungkan parameter dan bentuk URL
