@@ -6,13 +6,15 @@
  */
 
 // Load koneksi database
+// 1. Muat konfigurasi dan class utama (WAJIB PERTAMA)
+require_once __DIR__ . '/../../bootstrap.php';
+
+// 2. Proteksi endpoint menggunakan file utils bawaan (Wajib login / Token)
 require_once __DIR__ . '/../../utils/api_auth.php';
 require_once __DIR__ . '/../../config/koneksi.php';
 
-// Set header response
+// 3. Set header agar output berupa JSON
 header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET');
 
 // Proteksi Method HTTP
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
