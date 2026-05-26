@@ -657,11 +657,7 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
-    /**
-     * Menampilkan faktur penjualan berdasarkan filter tertentu (customerNo, fromDate, toDate)
-     * Endpoint: /accurate/api/sales-invoice/detail-invoice.do
-     * Scope: sales_invoice_view
-     */
+    
     public function getSalesInvoiceDetailFiltered($params = array()) {
         $endpoint = 'accurate/api/sales-invoice/detail-invoice.do';
         
@@ -747,12 +743,6 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'POST', $data);
     }
 
-    /**
-     * Menyimpan atau Memperbarui Penerimaan Penjualan (Sales Receipt) ke Accurate Online
-     * dengan Validasi Parameter Wajib Terpusat Berurutan.
-     * * @param array $data Payload data penerimaan sesuai dokumentasi /save.do
-     * @return array Hasil response dari Accurate API yang sudah di-decode
-     */
     public function saveSalesReceipt($data = array()) {
         $endpoint = 'accurate/api/sales-receipt/save.do';
         
@@ -835,10 +825,7 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'POST', $data);
     }
 
-    /**
-     * Mendapatkan detail data Penyesuaian Harga/Diskon
-     * Scope: sellingprice_adjustment_view
-     */
+   
     public function getSellingPriceAdjustmentDetail($id = null, $number = null) {
         $endpoint = 'accurate/api/sellingprice-adjustment/detail.do';
       
@@ -885,10 +872,7 @@ class AccurateAPI {
     }
 
 
-    /**
-     * Mengambil daftar Akun Perkiraan (COA / GL Account)
-     * Scope: glaccount_view
-     */
+    
     public function getGLAccountList($params = array()) {
         $endpoint = 'accurate/api/glaccount/list.do';
 

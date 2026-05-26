@@ -6,3 +6,5 @@
 edit invoice save.do
 4402 - Biaya Pengantaran ke Customer
 tambahkan api untuk mengambil pengiriman atau manual isi pengiriman (Ambil Sendiri, Kurir Toko)
+
+Nomor Seri

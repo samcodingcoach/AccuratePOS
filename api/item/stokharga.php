@@ -17,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-// 1. Ambil & Validasi Parameter Input dari URL Browser
 $itemNo            = isset($_GET['no']) ? trim($_GET['no']) : '';
 $priceCategoryName = isset($_GET['priceCategoryName']) ? trim($_GET['priceCategoryName']) : '';
 
@@ -33,9 +32,7 @@ if (empty($itemNo)) {
 try {
     $api = new AccurateAPI();
 
-    // ==========================================
-    // HIT 1: AMBIL DATA HARGA (getSellingPrice)
-    // ==========================================
+    
     $priceParams = ['no' => $itemNo];
     if (!empty($priceCategoryName)) {
         $priceParams['priceCategoryName'] = $priceCategoryName;
@@ -59,14 +56,10 @@ try {
         }
     }
 
-    // ==========================================
-    // MEKANISME JEDA WAKTU 1 DETIK (ANTI-RATE LIMIT)
-    // ==========================================
+   
     sleep(1); 
 
-    // ==========================================
-    // HIT 2: AMBIL DATA STOK (getListStock)
-    // ==========================================
+   
     $stockRes = $api->getListStock(''); 
     
     $availableStock = 0;
