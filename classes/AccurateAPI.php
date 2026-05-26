@@ -883,5 +883,57 @@ class AccurateAPI {
         
         return $this->makeRequest($endpoint, 'GET');
     }
+
+
+    /**
+     * Mengambil daftar Akun Perkiraan (COA / GL Account)
+     * Scope: glaccount_view
+     */
+    public function getGLAccountList($params = array()) {
+        $endpoint = 'accurate/api/glaccount/list.do';
+
+        // 1. Definisikan Default Parameter (Fields & Paginasi)
+        $defaultParams = array(
+            'sp.pageSize' => 100,
+            'sp.page'     => 1,
+            'fields'      => 'id,name,no'
+        );
+        
+        // 2. Ambil custom parameter dari request klien
+        $search = isset($params['search']) ? trim($params['search']) : '';
+
+        // Hapus key buatan sendiri agar tidak ikut ter-build ke query Accurate
+        unset($params['search']);
+
+        // ==============================================================
+        // 3. PEMETAAN FILTER SESUAI PERMINTAAN
+        // ==============================================================
+        
+        // A. Filter Tipe Akun (Piutang)
+        $params['filter.accountType.op']  = 'EQUAL';
+        $params['filter.accountType.val'] = 'REVENUE';
+        
+        // B. Filter Leaf (Hanya akun anak/ujung) dan Suspended
+        // Note: suspended = true berarti mengambil akun yang dinonaktifkan. 
+        // Ubah menjadi 'false' jika Anda ingin mengambil akun yang sedang aktif.
+        $params['filter.leafOnly']  = 'true';
+        $params['filter.suspended'] = 'false'; 
+
+        // C. Filter Pencarian (Mencari berdasarkan Nomor Akun)
+        if (!empty($search)) {
+            $params['filter.keywords.op']  = 'EQUAL';
+            $params['filter.keywords.val'] = array($search);
+        }
+
+        // 4. Gabungkan parameter dan bentuk URL
+        $queryParams = array_merge($defaultParams, $params);
+        
+        if (!empty($queryParams)) {
+            // http_build_query akan mengonversi array keywords.val menjadi val[0]=...
+            $endpoint .= '?' . http_build_query($queryParams);
+        }
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>
