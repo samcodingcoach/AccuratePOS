@@ -5,8 +5,8 @@
  */
 
 $host     = 'localhost';
-$username = 'samsu';
-$password = 'samsu';
+$username = 'matos';
+$password = '1234';
 $database = 'pos-accurate';
 
 // Set Timezone WITA (Samarinda)
