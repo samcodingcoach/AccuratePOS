@@ -28,6 +28,6 @@ output
           "expiredDate": ""
         },
         "quantity": 1
-      }
+      },...
 
 pastikan nomor seri tsb cocok
