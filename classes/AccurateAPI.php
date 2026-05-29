@@ -360,11 +360,58 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
+    
+    public function getItemDetailByNo($itemNo) {
+        if (empty($itemNo)) {
+            return array('success' => false, 'error' => 'Item No is required', 'data' => null);
+        }
+        
+        $endpoint = 'accurate/api/item/detail.do';
+        $params = array(
+            'no' => trim($itemNo)
+        );
+        
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
     public function getItemByUPC($upcNo) {
         if (empty($upcNo)) return array('success' => false, 'message' => 'UPC No is required');
 
         $endpoint = 'accurate/api/item/search-by-no-upc.do';
         $params = array('keywords' => $upcNo);
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
+    public function searchItemOrSN($keywords) {
+        $endpoint = 'accurate/api/item/search-by-item-or-sn.do';
+        
+        $params = array(
+            'keywords' => trim($keywords)
+        );
+        
+        // Gabungkan parameter menjadi query string
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
+   
+    public function getSerialNumberPerWarehouse($itemNo) {
+        if (empty($itemNo)) {
+            return array('success' => false, 'error' => 'Parameter itemNo wajib diisi', 'data' => null);
+        }
+        
+        $endpoint = 'accurate/api/report/serial-number-per-warehouse.do';
+        
+        $params = array(
+            'itemNo' => trim($itemNo)
+        );
+        
+        // Gabungkan parameter menjadi query string URL
         $endpoint .= '?' . http_build_query($params);
         
         return $this->makeRequest($endpoint, 'GET');
@@ -405,13 +452,7 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
-    /**
-     * Mendapatkan Harga Jual Barang
-     * Kondisi parameter wajib:
-     * 1. (no ATAU upcNo) 
-     * OLEH
-     * 2. (no DAN priceCategoryName)
-     */
+   
     public function getSellingPrice($params) {
         $hasNo = !empty($params['no']);
         $hasUpc = !empty($params['upcNo']);
@@ -633,10 +674,6 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
-    /**
-     * Mendapatkan detail Faktur Penjualan (Sales Invoice) berdasarkan ID atau Number
-     * Scope: sales_invoice_view
-     */
     public function getSalesInvoiceDetail($id = null, $number = null) {
         $endpoint = 'accurate/api/sales-invoice/detail.do';
         $params = array();
@@ -825,7 +862,6 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'POST', $data);
     }
 
-   
     public function getSellingPriceAdjustmentDetail($id = null, $number = null) {
         $endpoint = 'accurate/api/sellingprice-adjustment/detail.do';
       
@@ -872,7 +908,6 @@ class AccurateAPI {
     }
 
 
-    
     public function getGLAccountList($params = array()) {
         $endpoint = 'accurate/api/glaccount/list.do';
 
