@@ -191,13 +191,14 @@ function formatLastSync($datetimeStr) {
                 <th>Nama Barang</th>
                 <th>Harga</th>
                 <th>Stok</th>
+                <th>Action</th>
                 <th>Last Sync</th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($items)): ?>
                 <tr>
-                    <td colspan="8" align="center">Data tidak ditemukan atau kosong.</td>
+                    <td colspan="9" align="center">Data tidak ditemukan atau kosong.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($items as $item): ?>
@@ -229,6 +230,22 @@ function formatLastSync($datetimeStr) {
                         <td align="right"><?php echo number_format($item['price'] ?? 0, 0, ',', '.'); ?></td>
                         
                         <td align="center"><?php echo number_format($item['balance'] ?? 0, 0, ',', '.'); ?></td>
+
+                        <td align="center">
+                            <a
+                                href="update-pp.php?no=<?php echo urlencode($item['item_no'] ?? ''); ?>"
+                                style="
+                                    display:inline-block;
+                                    padding:4px 8px;
+                                    text-decoration:none;
+                                    border:1px solid #666;
+                                    background:#f5f5f5;
+                                    color:#000;
+                                "
+                            >
+                                Update Foto
+                            </a>
+                        </td>
                         
                         <td align="center"><?php echo formatLastSync($item['last_sync'] ?? ''); ?></td>
                     </tr>
