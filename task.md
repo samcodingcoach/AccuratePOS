@@ -3,6 +3,9 @@
   https://resto.samdev.org/pos-accurate/api/pelanggan/list.php?
   https://resto.samdev.org/pos-accurate/api/pelanggan/list.php?search=Membership
 
+-cari promo
+http://localhost/pos-accurate/api/promo/listpromo-lokal.php?no=100015&category=membership
+
 buat table promo
 name, start,finish, persentase,active,kuota,category_user, no_item
 
@@ -15,3 +18,5 @@ diskon view tambahkan picker untuk memunculkan nama promo berdasarkan table prom
 
 api dijalankan saat form_load ItemAdd
 jangan lupa untuk update kuota setelah modul faktur penjualan di eksekusi
+
+cek postman untuk sesuaikan api save.do faktur penjualan [ok]
