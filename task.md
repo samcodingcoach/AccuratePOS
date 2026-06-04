@@ -19,7 +19,7 @@ redesign cart container[ok]
 diskon view tambahkan picker untuk memunculkan nama promo berdasarkan table promo[ok]
 
 api dijalankan saat form_load ItemAdd [ok]
-jangan lupa untuk update kuota setelah modul faktur penjualan di eksekusi
+jangan lupa untuk update kuota setelah modul faktur penjualan di eksekusi [ok]
 
 cek postman untuk sesuaikan api save.do faktur penjualan [ok]
 
