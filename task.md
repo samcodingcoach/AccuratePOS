@@ -13,13 +13,16 @@ buat api untuk promo munculkan nama_promo,persentase berdasarkan category_user, 
 
 letakan disini api\promo\listpromo-lokal.php [ok]
 
-tambahkan di newfaktur field keterangan,
+tambahkan di newfaktur field keterangan, [ok]
 tambhkan angka persen ketika kembali ke new faktur[ok]
 redesign cart container[ok]
 diskon view tambahkan picker untuk memunculkan nama promo berdasarkan table promo[ok]
 
 api dijalankan saat form_load ItemAdd [ok]
 jangan lupa untuk update kuota setelah modul faktur penjualan di eksekusi [ok]
+
+
+update kuota promo pake id_promo
 
 cek postman untuk sesuaikan api save.do faktur penjualan [ok]
 
@@ -42,3 +45,4 @@ EntryTotalDiskon
 EntryTotalBiaya
 EntryTotalPajak
 EntryGrandTotal
+EntryKeterangan

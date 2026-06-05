@@ -33,41 +33,40 @@ try {
     }
 
     $kuota = isset($input['kuota']) ? $input['kuota'] : '';
-    $itemNo = isset($input['item_no']) ? trim($input['item_no']) : '';
-    $name = isset($input['name']) ? trim($input['name']) : '';
-    $categoryUser = isset($input['category_user']) ? trim($input['category_user']) : '';
+    $idPromo = isset($input['id_promo']) ? $input['id_promo'] : '';
 
     // Validasi parameter wajib
-    if ($kuota === '' || $itemNo === '' || $name === '' || $categoryUser === '') {
+    if ($kuota === '' || $idPromo === '') {
         http_response_code(400);
         echo json_encode([
             'status' => 'error',
-            'message' => 'Parameter kuota, item_no, name, dan category_user wajib diisi'
+            'message' => 'Parameter kuota dan id_promo wajib diisi'
         ], JSON_PRETTY_PRINT);
         exit;
     }
 
-    // Pastikan kuota adalah angka
-    if (!is_numeric($kuota)) {
+    // Pastikan kuota dan id_promo adalah angka
+    if (!is_numeric($kuota) || !is_numeric($idPromo)) {
         http_response_code(400);
         echo json_encode([
             'status' => 'error',
-            'message' => 'Parameter kuota harus berupa angka'
+            'message' => 'Parameter kuota dan id_promo harus berupa angka'
         ], JSON_PRETTY_PRINT);
         exit;
     }
 
     $kuota = (int)$kuota;
+    $idPromo = (int)$idPromo;
 
     // 5. Query UPDATE
-    $sql = "UPDATE promo SET kuota = kuota - ? WHERE item_no = ? AND name = ? AND category_user = ?";
+    $sql = "UPDATE promo SET kuota = kuota - ? WHERE id_promo = ?";
     
     $stmt = $conn->prepare($sql);
     if (!$stmt) {
         throw new Exception("Gagal menyiapkan statement: " . $conn->error);
     }
 
-    $stmt->bind_param("isss", $kuota, $itemNo, $name, $categoryUser);
+    $stmt->bind_param("ii", $kuota, $idPromo);
     $stmt->execute();
 
     if ($stmt->affected_rows > 0) {
@@ -84,9 +83,7 @@ try {
         'status'  => 'success',
         'message' => $message,
         'data'    => [
-            'item_no'          => $itemNo,
-            'name'             => $name,
-            'category_user'    => $categoryUser,
+            'id_promo'         => $idPromo,
             'kuota_dikurangi'  => $kuota
         ],
         'meta' => [
