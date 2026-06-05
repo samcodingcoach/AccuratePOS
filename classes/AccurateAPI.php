@@ -954,5 +954,43 @@ class AccurateAPI {
         
         return $this->makeRequest($endpoint, 'GET');
     }
+
+    public function getItemCategoryList($params = array()) {
+        $endpoint = 'accurate/api/item-category/list.do';
+        
+        $defaultParams = array(
+            'sp.pageSize' => 100,
+            'sp.page'     => 1,
+            'fields'      => 'id,name,nameWithIndent'
+        );
+        
+        $search = isset($params['search']) ? trim($params['search']) : '';
+        unset($params['search']);
+
+        if (!empty($search)) {
+            $params['filter.keywords.op']  = 'CONTAIN';
+            $params['filter.keywords.val'] = array($search);
+        }
+
+        $queryParams = array_merge($defaultParams, $params);
+        
+        if (!empty($queryParams)) {
+            $endpoint .= '?' . http_build_query($queryParams);
+        }
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
+    public function getItemCategoryDetail($id) {
+        if (empty($id)) {
+            return array('success' => false, 'error' => 'Kategori ID wajib diisi', 'data' => null);
+        }
+        
+        $endpoint = 'accurate/api/item-category/detail.do';
+        $params = array('id' => $id);
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>
