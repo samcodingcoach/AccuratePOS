@@ -961,7 +961,7 @@ class AccurateAPI {
         $defaultParams = array(
             'sp.pageSize' => 100,
             'sp.page'     => 1,
-            'fields'      => 'id,name,nameWithIndent'
+            'fields'      => 'id,name,nameWithIndent,parent'
         );
         
         $search = isset($params['search']) ? trim($params['search']) : '';

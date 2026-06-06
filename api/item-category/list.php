@@ -50,10 +50,20 @@ try {
             $lvl = (int)$category['lvl'];
         }
 
+        $parentId = null;
+        $parentName = null;
+        if (isset($category['parent']) && is_array($category['parent'])) {
+            $parentId = $category['parent']['id'] ?? null;
+            $parentName = $category['parent']['name'] ?? null;
+        }
+
         $filteredCategories[] = [
-            'id'   => $category['id'] ?? null,
-            'name' => $category['name'] ?? '',
-            'lvl'  => $lvl
+            'id'          => $category['id'] ?? null,
+            'name'        => $category['name'] ?? '',
+            'lvl'         => $lvl,
+            'parent_id'   => $parentId,
+            'parent_name' => $parentName,
+            'is_sub'      => !empty($parentId)
         ];
     }
 
