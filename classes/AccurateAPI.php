@@ -694,7 +694,6 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
-    
     public function getSalesInvoiceDetailFiltered($params = array()) {
         $endpoint = 'accurate/api/sales-invoice/detail-invoice.do';
         
@@ -991,6 +990,18 @@ class AccurateAPI {
         $endpoint .= '?' . http_build_query($params);
         
         return $this->makeRequest($endpoint, 'GET');
+    }
+
+    public function deleteSalesInvoice($number) {
+        if (empty($number)) {
+            return array('success' => false, 'error' => 'Nomor Faktur wajib diisi', 'data' => null);
+        }
+        
+        $endpoint = 'accurate/api/sales-invoice/delete.do';
+        $params = array('number' => $number);
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'DELETE');
     }
 }
 ?>

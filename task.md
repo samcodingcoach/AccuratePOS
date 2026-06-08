@@ -3,7 +3,11 @@
   https://resto.samdev.org/pos-accurate/api/pelanggan/list.php?
   https://resto.samdev.org/pos-accurate/api/pelanggan/list.php?search=Membership
 
+api penjualan/detail-invoice.php?number=SI.2026.06.00002
+
 -cari promo
+
+
 http://localhost/pos-accurate/api/promo/listpromo-lokal.php?no=100015&category=membership
 
 buat table promo
@@ -46,3 +50,141 @@ EntryTotalBiaya
 EntryTotalPajak
 EntryGrandTotal
 EntryKeterangan
+
+{
+  "status": "success",
+  "data": {
+    "tax1Amount": 340773,
+  
+    "poNumber": "PO/2026/9010",
+    "toAddress": "Jl. Ahmad Yani",
+    "shipment": {
+      "name": "Kurir Toko",
+    },
+   
+    "description": "Antar jam 5 sore",
+    "transDate": "05/06/2026",
+    "cashDiscount": 63515,
+    "number": "SI.2026.06.00002",
+    "detailExpense": [
+      {
+        "detailName": "Pengantaran ke Customer",
+        "expenseAmount": 50000,
+        "account": {
+          "no": "4402",
+          }
+      }
+    ],
+    "detailItem": [
+      {
+        "detailSerialNumber": [
+          {
+            "quantity": 1,
+            "serialNumber": 
+            {
+              "number": "M7-002"
+            }
+          }
+        ],
+        "unitPrice": 2699000,
+        "salesmanName": "Lia Octaviana",
+       
+        "warehouse": {
+          "name": "Gudang Utama",
+        },
+        "detailName": "POCO M7 (8GB/256GB) - Black",
+        "totalPrice": 2699000,
+        "salesmanList": [
+          {
+            "number": "E.00002",
+          }
+        ],
+        "itemDiscPercent":3,
+        "quantity": 1,
+      },
+     
+    ],
+    "totalExpense": 50000,
+    "subTotal": 3161452.35,
+    "lastCashDiscount": 63515,
+    "totalAmount": 3488710.35,
+    "customer": {
+      "name": "Membership",
+      "customerNo": "MB002",
+    }
+  }
+}
+
+tambahkan di simpan "numericField1" : 0; sampai 3
+batasi tambah promo hanya 3 row teratas.
+
+{
+  "status": "success",
+  "data": {
+    "tax1Amount": 340773,
+    "numericField1" : 0;
+    "numericField2" : 0;
+    "numericField3" : 0;
+    "poNumber": "PO/2026/9010",
+    "toAddress": "Jl. Ahmad Yani",
+    "shipment": {
+      "name": "Kurir Toko",
+    },
+    "description": "Antar jam 5 sore",
+    "transDate": "05/06/2026",
+    "cashDiscount": 63515,
+    "number": "SI.2026.06.00002",
+    "detailExpense": [
+      {
+        "id" : 201,
+        "detailName": "Pengantaran ke Customer",
+        "expenseAmount": 50000,
+        "account": {
+          "no": "4402",
+          }
+      }
+    ],
+    "detailItem": [
+      {
+        "detailSerialNumber": [
+          {
+            "quantity": 1,
+            "serialNumber": 
+            {
+              "number": "M7-002"
+            },
+            "id" : 350
+          }
+        ],
+        "unitPrice": 2699000,
+        "salesmanName": "Lia Octaviana",
+        "item" : 
+        {
+          "no": "100015", <- NoItem Sekaligus gambar yang mana tinggal ditambah .jpg
+        }
+        "warehouse": {
+          "name": "Gudang Utama",
+        },
+        "detailName": "POCO M7 (8GB/256GB) - Black",
+        "totalPrice": 2699000,
+        "salesmanList": [
+          {
+            "number": "E.00002",
+          }
+        ],
+        "itemDiscPercent":3,
+        "quantity": 1,
+      },
+     
+    ],
+    "totalExpense": 50000,
+    "subTotal": 3161452.35,
+    "lastCashDiscount": 63515,
+    "totalAmount": 3488710.35,
+    "customer": {
+      "name": "Membership",
+      "customerNo": "MB002",
+    },
+    "id" : 450;
+  }
+}
