@@ -188,3 +188,32 @@ batasi tambah promo hanya 3 row teratas.
     "id" : 450;
   }
 }
+
+
+"data" : {
+"subTotal": 100000,
+"cashDiscount": 1322510,
+"totalExpense": 15000,
+"tax1Amount": 145476,
+"totalAmount": 1482986,
+"number": "SI.2026.06.00001",
+"description" : "Test Description",
+"transDate" : "08/06/2026"
+"detailItem": [
+      {
+        "item": {
+          "unitPrice": 2800000,
+          "name": "POCO M7 (8GB/256GB) - Black",
+          "no": "100014",
+        },
+        "itemCashDiscount": 53980,
+        "totalPrice": 2645020,
+        "quantity":1
+      }
+    ],
+"customer": 
+    {
+       "name": "Membership",
+       "customerNo": "MB002"
+    }
+}
