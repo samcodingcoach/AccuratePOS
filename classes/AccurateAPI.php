@@ -954,6 +954,50 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
+    public function getGLAccountList_CASHBANK($params = array()) {
+        $endpoint = 'accurate/api/glaccount/list.do';
+
+        // 1. Definisikan Default Parameter (Fields & Paginasi)
+        $defaultParams = array(
+            'sp.pageSize' => 100,
+            'sp.page'     => 1,
+            'fields'      => 'id,name,no'
+        );
+        
+        // 2. Ambil custom parameter dari request klien
+        $search = isset($params['search']) ? trim($params['search']) : '';
+
+        // Hapus key buatan sendiri agar tidak ikut ter-build ke query Accurate
+        unset($params['search']);
+
+        // ==============================================================
+        // 3. PEMETAAN FILTER SESUAI PERMINTAAN
+        // ==============================================================
+        
+        // A. Filter Tipe Akun (Kas & Bank)
+        $params['filter.accountType.op']  = 'EQUAL';
+        $params['filter.accountType.val'] = 'CASH_BANK';
+        
+        // B. Filter Leaf (Hanya akun anak/ujung) dan Suspended
+        $params['filter.leafOnly']  = 'true';
+        $params['filter.suspended'] = 'false'; 
+
+        // C. Filter Pencarian (Mencari berdasarkan Nomor Akun)
+        if (!empty($search)) {
+            $params['filter.keywords.op']  = 'EQUAL';
+            $params['filter.keywords.val'] = array($search);
+        }
+
+        // 4. Gabungkan parameter dan bentuk URL
+        $queryParams = array_merge($defaultParams, $params);
+        
+        if (!empty($queryParams)) {
+            $endpoint .= '?' . http_build_query($queryParams);
+        }
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
     public function getItemCategoryList($params = array()) {
         $endpoint = 'accurate/api/item-category/list.do';
         

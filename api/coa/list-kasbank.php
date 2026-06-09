@@ -1,7 +1,7 @@
 <?php
 /**
- * API ENDPOINT - LIST COA / GL ACCOUNT (ACCOUNT RECEIVABLE)
- * File: api/coa/list.php
+ * API ENDPOINT - LIST COA / GL ACCOUNT (CASH BANK)
+ * File: api/coa/list-kasbank.php
  */
 
 // 1. Muat konfigurasi dan class utama
@@ -37,8 +37,8 @@ try {
         'search'      => $search
     ];
 
-    // Eksekusi fungsi getGLAccountList
-    $result = $api->getGLAccountList($params);
+    // Eksekusi fungsi getGLAccountList_CASHBANK
+    $result = $api->getGLAccountList_CASHBANK($params);
 
     if (isset($result['success']) && $result['success']) {
         
@@ -48,7 +48,7 @@ try {
 
         echo json_encode([
             'status'  => 'success',
-            'message' => 'Data Akun Perkiraan (COA) Pendapatan berhasil dimuat',
+            'message' => 'Data Akun Perkiraan (COA) Kas & Bank berhasil dimuat',
             'data'    => $coaData,
             'pagination' => [
                 'current_page' => $page,
