@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 try {
     // 4. Query Database
-    $sql = "SELECT id_midtrans, MerchantID, ClientKey, ServerKey, UpdateAt FROM midtrans";
+    $sql = "SELECT id_midtrans, MerchantID, ClientKey, ServerKey, UpdateAt FROM midtrans ORDER BY UpdateAt DESC";
     $result = $conn->query($sql);
 
     if (!$result) {
