@@ -1,23 +1,6 @@
 <?php
 require_once 'config.php'; // Konfigurasi Midtrans
 $data = json_decode(file_get_contents('php://input'), true);
-// Ambil data JSON dari body request
-/* $requestContent = file_get_contents('php://input');
-$requestData = json_decode($requestContent, true);
-
-// Validasi data
-if (!isset($requestData['order_id']) || !isset($requestData['gross_amount'])) {
-    echo json_encode([
-        'status' => 'error',
-        'message' => 'Invalid request data. order_id and gross_amount are required.',
-    ]);
-    exit;
-}
-
-$orderId = $requestData['order_id'];
-$grossAmount = (int)$requestData['gross_amount']; */
-
-
 $orderId = $data['order_id'];
 $grossAmount = $data['gross_amount'];
 
