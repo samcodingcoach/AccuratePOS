@@ -43,6 +43,8 @@ if (isset($responseData['transaction_status'])) {
         'order_id' => $responseData['order_id'] ?? null,
         'gross_amount' => $responseData['gross_amount'] ?? null,
         'transaction_status' => $responseData['transaction_status'] ?? null,
+        'transaction_id' => $responseData['transaction_id'] ?? null,
+        'acquirer' => $responseData['acquirer'] ?? null,
         'settlement_time' => $responseData['settlement_time'] ?? null,
     ];
     
