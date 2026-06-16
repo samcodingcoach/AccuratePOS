@@ -779,6 +779,26 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'POST', $data);
     }
 
+    public function getSalesReceiptDetail($id = null, $number = null) {
+        $endpoint = 'accurate/api/sales-receipt/detail.do';
+        $params = array();
+
+        if (!empty($id)) {
+            $params['id'] = $id;
+        } elseif (!empty($number)) {
+            $params['number'] = $number;
+        } else {
+            return array(
+                'success' => false,
+                'error' => 'ID atau Nomor Penerimaan Penjualan tidak boleh kosong'
+            );
+        }
+        
+        $endpoint .= '?' . http_build_query($params);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
     public function saveSalesReceipt($data = array()) {
         $endpoint = 'accurate/api/sales-receipt/save.do';
         

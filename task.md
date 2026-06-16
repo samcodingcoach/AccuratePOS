@@ -217,3 +217,84 @@ batasi tambah promo hanya 3 row teratas.
        "customerNo": "MB002"
     }
 }
+
+API PENERIMAAN UNTUK STRUK
+penjualan/detail-receipt.php?number=XXX
+{
+  "status": "success",
+  "data": {
+    "number": "110103.2026.06.00016",
+    "totalPayment": 16600,
+    "charField2": "1 - Administrator", // KASIR
+    "charField1": "087b800c-0eb8-4e3f-a198-585a59308bad", // QRIS_ID
+    "id": 250,
+    "detailInvoice": [
+      {
+        "invoice" : { "number" : "SI.2026.06.00013"},
+        "detailDiscount": [
+          {
+            "amount": 50,
+            "account": {"name": "Beban Pembulatan Transaksi"}
+          } // INI BISA LEBIH DARI 1 ROW DATA
+        ]
+      }
+    ],
+    "totalDiscount": 50,
+    "paymentMethod": "CASH_OTHER",
+    "description": null, // CATATAN
+    "transDate": "15/06/2026",
+    "numericField2": 0, // NOMOR_VA
+    "numericField1": 0, // KEMBALIAN KHUSUS TUNAI
+    "customer": {
+      "name": "Shopee", // NAMA_KONSUMEN
+      "customerNo": "C.00001", // KODE_KONSUMEN
+    }
+   
+  }
+}
+
+API DETAIL BARANG YANG DI INVOICE KAN
+penjualan/detail-invoice.php?number=XXX
+"data": {
+    "toAddress": "", // alamat
+    "shipment": {
+      "name": "Ambil Sendiri", // MODE PENGIRIMAN
+    },
+    "tax1AmountBase": 1650, // TOTAL PAJAK
+    "transDate": "12/06/2026",
+    "cashDiscount": 0, // TOTAL DISKON INVOICE
+    "number": "SI.2026.06.00013", NOMOR_INVOICE
+    "detailItem": [
+      {
+        "itemUnit": {
+          "name": "PCS",
+        },
+        "detailSerialNumber": [],
+        "unitPrice": 15000,
+        "salesmanName": "Lia Octaviana",
+        "item": {
+          "id": 56,
+          "shortName": "FlashDisk TOSHIBA 2GB",
+          "name": "FlashDisk TOSHIBA 2GB",
+          "no": "100001",
+        },
+        "quantity": 1,
+      }
+    ],
+    "detailExpense": [
+      {
+        "detailName": "Pengantaran ke Customer",
+        "expenseAmount": 20000,
+      }
+    ],
+    "status": "PAID",
+    "subTotal": 15000,
+    "masterSalesmanName": "Lia Octaviana",
+    "totalAmount": 16650,
+    "receiptHistory": [
+      {
+        "historyNumber": "110103.2026.06.00016",
+        "historyPaymentName": "Tunai",
+      }
+    ]
+  }
