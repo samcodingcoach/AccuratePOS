@@ -1081,5 +1081,10 @@ class AccurateAPI {
         $url .= '?' . http_build_query($params);
         return $this->executeCurl($url, 'GET');
     }
+
+    public function getCompanyProfile() {
+        $endpoint = 'accurate/api/company/detail.do';
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>
