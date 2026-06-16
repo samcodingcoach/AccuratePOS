@@ -1067,5 +1067,19 @@ class AccurateAPI {
         
         return $this->makeRequest($endpoint, 'DELETE');
     }
+    public function getDatabaseList() {
+        $url = 'https://account.accurate.id/api/db-list.do';
+        return $this->executeCurl($url, 'GET');
+    }
+
+    public function getDatabaseDetail($id) {
+        if (empty($id)) {
+            return array('success' => false, 'error' => 'ID Database wajib diisi', 'data' => null);
+        }
+        $url = 'https://account.accurate.id/api/db-detail.do';
+        $params = array('id' => $id);
+        $url .= '?' . http_build_query($params);
+        return $this->executeCurl($url, 'GET');
+    }
 }
 ?>
