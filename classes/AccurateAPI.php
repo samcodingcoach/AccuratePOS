@@ -779,6 +779,52 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'POST', $data);
     }
 
+    public function getSalesReceiptList($params = array(), $page = null) {
+        $endpoint = 'accurate/api/sales-receipt/list.do';
+        
+        $defaultParams = array(
+            'sp.pageSize' => 100,
+            'sp.page'     => 1,
+            'fields'      => 'id,number,transDate,customer,customer.name,totalPayment,charField2,paymentMethodName,bank,bank.name'
+        );
+        
+        if (is_int($params) && $page !== null) {
+            $params = array(
+                'sp.pageSize' => $params,
+                'sp.page'     => $page
+            );
+        } elseif (!is_array($params)) {
+            $params = array();
+        }
+        
+        $processedFilters = array();
+
+        if (!empty($params['start_date']) && !empty($params['end_date'])) {
+            $processedFilters['filter.transDate.op']     = 'BETWEEN';
+            $processedFilters['filter.transDate.val[0]'] = date('d/m/Y', strtotime($params['start_date']));
+            $processedFilters['filter.transDate.val[1]'] = date('d/m/Y', strtotime($params['end_date']));
+        }
+
+        if (!empty($params['customerNo'])) {
+            $processedFilters['filter.customerNo'] = trim($params['customerNo']);
+        }
+        
+        if (!empty($params['number'])) {
+            $processedFilters['filter.number.op']  = 'EQUAL';
+            $processedFilters['filter.number.val'] = trim($params['number']);
+        }
+
+        unset($params['start_date'], $params['end_date'], $params['customerNo'], $params['number']);
+
+        $queryParams = array_merge($defaultParams, $processedFilters, $params);
+        
+        if (!empty($queryParams)) {
+            $endpoint .= '?' . http_build_query($queryParams);
+        }
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
     public function getSalesReceiptDetail($id = null, $number = null) {
         $endpoint = 'accurate/api/sales-receipt/detail.do';
         $params = array();

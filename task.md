@@ -298,3 +298,70 @@ penjualan/detail-invoice.php?number=XXX
       }
     ]
   }
+  
+item/detail_byNo.php?no=100007
+
+{
+  "status": "success",
+  "message": "Detail barang berhasil dimuat",
+  "data": {
+    "s": true,
+    "d": {
+      "balance": 9, // stokavailableProduct
+      "detailWarehouseData": [
+        {
+          "balanceUnit": "9 PCS",
+          "pic": "Bp. Samsu",
+          "name": "Gudang Utama", // warehouseProduct
+        }
+      ],
+      "detailSellingPrice": [
+        {
+          "price": 70000,
+          "priceCategory": {
+            "name": "Free"
+          },
+          "effectiveDate": "17/06/2026"
+        },
+        {
+          "price": 70000,
+          "priceCategory": {
+            "name": "Membership"
+          },
+          "effectiveDate": "10/06/2026"
+        },
+        {
+          "price": 99000,
+          "priceCategory": {
+            "name": "Shopee"
+          },
+          "effectiveDate": "10/06/2026"
+        },
+        {
+          "price": 75900,
+          "priceCategory": {
+            "name": "Umum"
+          },
+          "effectiveDate": "10/06/2026"
+        }
+      ],
+      "unitPrice": 70000, // noitemProduct
+      "itemCategory": {
+        "name": "Mouse"
+      },
+      "unit1": {
+        
+        "name": "PCS" // stokavailableProduct for unit
+        
+      },
+      "weight": 250,
+      "upcNo": null,
+      "name": "Rexus Mouse Office Wireless Q30", // nameProduct
+      "manageExpired": false,
+      "no": "100007", // noitemProduct
+      "tax1": {
+        "taxInfo": "PPN 12%",
+      }
+    }
+  }
+}
