@@ -230,7 +230,7 @@ penjualan/detail-receipt.php?number=XXX
     "id": 250,
     "detailInvoice": [
       {
-        "invoice" : { "number" : "SI.2026.06.00013"},
+        "invoice" : { "number" : "SI.2026.06.00013","status": "PAID"},
         "detailDiscount": [
           {
             "amount": 50,
@@ -298,7 +298,7 @@ penjualan/detail-invoice.php?number=XXX
       }
     ]
   }
-  
+
 item/detail_byNo.php?no=100007
 
 {
@@ -365,3 +365,5 @@ item/detail_byNo.php?no=100007
     }
   }
 }
+
+
