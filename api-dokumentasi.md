@@ -498,6 +498,27 @@ Mengambil informasi lengkap (detail) dari satu profil karyawan.
   - `id` atau `number` (Salah Satu Wajib): ID unik sistem atau Nomor Karyawan.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail karyawan.
 
+### 26.1 API Simpan Karyawan (Save / Update Employee)
+Menyimpan data karyawan baru atau memperbarui data karyawan yang sudah ada di Accurate Online.
+
+- **URL:** `/api/karyawan/save.php`
+- **Method:** `POST`
+- **Payload Data (JSON / Form-Data):**
+  - `name` (Wajib - String): Nama karyawan.
+  - `id` (Opsional - Integer): ID karyawan. Diisi jika ingin melakukan **Update** data yang sudah ada.
+  - `number` (Opsional - String): Nomor karyawan. Jika dikosongkan, Accurate akan membuatkan secara otomatis.
+  - `salutation` (Wajib - String): Sapaan (contoh: `MR`, `MRS`).
+  - `transDate` (Wajib - String): Tanggal transaksi/pencatatan (format: `DD/MM/YYYY` atau `YYYY-MM-DD`).
+  - `joinDate` (Opsional - String): Tanggal bergabung (format: `DD/MM/YYYY` atau `YYYY-MM-DD`).
+  - `bankAccount` (Opsional - String): Nomor rekening bank.
+  - `bankCode` (Opsional - String): Kode bank.
+  - `bankName` (Opsional - String): Nama bank.
+  - `bankAccountName` (Opsional - String): Nama pemilik rekening.
+  - `salesman` (Opsional - Boolean): Apakah karyawan ini adalah seorang tenaga penjual (salesman). Default akan dibaca sebagai `false` jika tidak dikirim.
+  - `domisiliType` (Opsional - String): Tipe domisili (contoh: `INA`).
+  - `email` (Opsional - String): Alamat email karyawan.
+  - `mobilePhone` (Opsional - String): Nomor handphone.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail karyawan yang baru saja disimpan atau diperbarui.
 ### 27. API Daftar Jasa Pengiriman (Shipment List)
 Mengambil daftar ekspedisi atau jasa pengiriman yang tersedia di Accurate Online. API ini telah dipangkas sedemikian rupa sehingga hanya mengembalikan **ID** dan **Nama** pengiriman saja.
 

@@ -1145,5 +1145,20 @@ class AccurateAPI {
 
         return $this->makeRequest($endpoint, 'POST', $data);
     }
+
+    public function saveEmployee($data = array()) {
+        $endpoint = 'accurate/api/employee/save.do';
+        
+        if (!isset($data['name']) || trim($data['name']) === '' ||
+            !isset($data['salutation']) || trim($data['salutation']) === '' ||
+            !isset($data['transDate']) || trim($data['transDate']) === '') {
+            return array(
+                'success' => false,
+                'error'   => 'Parameter "name", "salutation", dan "transDate" wajib diisi.'
+            );
+        }
+
+        return $this->makeRequest($endpoint, 'POST', $data);
+    }
 }
 ?>
