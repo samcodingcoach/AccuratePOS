@@ -1132,5 +1132,18 @@ class AccurateAPI {
         $endpoint = 'accurate/api/company/detail.do';
         return $this->makeRequest($endpoint, 'GET');
     }
+
+    public function saveItemCategory($data = array()) {
+        $endpoint = 'accurate/api/item-category/save.do';
+        
+        if (!isset($data['name']) || trim($data['name']) === '') {
+            return array(
+                'success' => false,
+                'error'   => 'Parameter "name" (Nama Kategori) wajib diisi.'
+            );
+        }
+
+        return $this->makeRequest($endpoint, 'POST', $data);
+    }
 }
 ?>

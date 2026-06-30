@@ -228,6 +228,28 @@ Mengambil detail informasi spesifik untuk satu kategori barang.
   - `id` (Wajib - Integer): ID kategori barang.
 - **Response Sukses (200 OK):** Mengembalikan object detail kategori dari Accurate.
 
+### 9.1 API Simpan Kategori Barang (Save Item Category)
+Menyimpan atau membuat Kategori Barang (Item Category) baru ke Accurate Online.
+
+- **URL:** `/api/item-category/save.php`
+- **Method:** `POST`
+- **Payload Data (JSON / Form-Data):**
+  - `name` (Wajib - String): Nama kategori barang.
+  - `defaultCategory` (Opsional - Boolean): Apakah ini kategori default (`true`/`false`).
+  - `parentName` (Opsional - String): Nama dari kategori induk (jika ini merupakan sub-kategori). Dapat diisi dengan string kosong `""` jika tidak ingin memiliki kategori induk.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail kategori yang baru saja disimpan.
+
+### 9.2 API Update Kategori Barang (Update Item Category)
+Memperbarui Kategori Barang (Item Category) yang sudah ada di Accurate Online.
+
+- **URL:** `/api/item-category/update.php`
+- **Method:** `POST`
+- **Payload Data (JSON / Form-Data):**
+  - `id` (Wajib - String/Integer): ID dari kategori barang yang ingin diperbarui.
+  - `name` (Wajib - String): Nama kategori barang (baru atau tetap).
+  - `defaultCategory` (Opsional - Boolean): Apakah ini kategori default (`true`/`false`).
+  - `parentName` (Opsional - String): Nama dari kategori induk (jika ini merupakan sub-kategori). Dapat diisi dengan string kosong `""` untuk **menghapus** relasi kategori induk yang sudah ada sebelumnya.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail kategori yang baru saja diperbarui.
 ### 10. API Barang (Item List - Accurate)
 Mengambil daftar barang **langsung dari Accurate Online** dengan versi yang lebih ringan (hanya mengekstrak field penting seperti stok `balance`, harga `price`, dan gambar `image`). 
 
