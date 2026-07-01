@@ -1160,5 +1160,6 @@ class AccurateAPI {
 
         return $this->makeRequest($endpoint, 'POST', $data);
     }
+
 }
 ?>

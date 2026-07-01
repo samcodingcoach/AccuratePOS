@@ -53,7 +53,8 @@ try {
             'is_default'    => $w['defaultWarehouse'] ?? false,
             'is_scrap'      => $w['scrapWarehouse'] ?? false,
             'location_id'   => $w['locationId'] ?? null,
-            'full_address'  => null, // Akan diisi dari detail
+            'street'        => null, // Akan diisi dari detail
+            'province'      => null, // Akan diisi dari detail
             'pic'           => null  // Akan diisi dari detail
         ];
 
@@ -64,7 +65,8 @@ try {
             $d = $detailRes['data']['d'];
             
             // Perkaya data dengan field yang biasanya hanya ada di detail
-            $warehouseData['full_address'] = $d['address'] ?? ($d['description'] ?? '');
+            $warehouseData['street']       = $d['street'] ?? '';
+            $warehouseData['province']     = $d['province'] ?? '';
             $warehouseData['pic']          = $d['pic'] ?? null;
             
             // Tambahkan field lain jika Accurate menyediakannya di level detail

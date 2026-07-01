@@ -183,7 +183,8 @@ Mengambil daftar gudang beserta detail lengkapnya (termasuk alamat dan nama loka
               "is_default": true,
               "is_scrap": false,
               "location_id": null,
-              "full_address": "Jl. Kesejahteraan",
+              "street": "Jl. Kesejahteraan",
+              "province": "KALIMANTAN TIMUR",
               "pic": "Budi"
           }
       ],
@@ -191,6 +192,15 @@ Mengambil daftar gudang beserta detail lengkapnya (termasuk alamat dan nama loka
       "meta": { ... }
   }
   ```
+
+### 7.1 API Detail Gudang (Warehouse Detail)
+Mengambil informasi detail untuk sebuah gudang.
+
+- **URL:** `/api/gudang/detail.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `id` (Wajib - Integer): ID unik dari gudang.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail gudang.
 
 ### 8. API Kategori Barang (Item Category)
 Mengambil daftar kategori barang, dilengkapi perhitungan Level Indentasi (`lvl`) dan informasi Parent Category.
