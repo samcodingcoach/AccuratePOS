@@ -202,6 +202,21 @@ Mengambil informasi detail untuk sebuah gudang.
   - `id` (Wajib - Integer): ID unik dari gudang.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail gudang.
 
+### 7.2 API Update Gudang (Update Warehouse)
+Memperbarui informasi data gudang di Accurate Online berdasarkan ID gudang.
+
+- **URL:** `/api/gudang/update.php`
+- **Method:** `POST`
+- **Payload Data (JSON / Form-Data):**
+  - `id` (Wajib - Integer/String): ID unik gudang yang ingin diperbarui.
+  - `name` (Wajib - String): Nama gudang.
+  - `pic` (Opsional - String): Nama penanggung jawab (PIC) gudang.
+  - `province` (Opsional - String): Nama provinsi dari alamat gudang.
+  - `street` (Opsional - String): Alamat lengkap (jalan) gudang.
+  - `scrapWarehouse` (Opsional - Boolean): Tanda jika gudang ini adalah gudang barang rusak. Default akan dibaca `true` jika tidak dikirim, sesuai spesifikasi internal.
+  - `suspended` (Opsional - Boolean): Tanda jika gudang dinonaktifkan. Default `false`.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail gudang yang baru diperbarui.
+
 ### 8. API Kategori Barang (Item Category)
 Mengambil daftar kategori barang, dilengkapi perhitungan Level Indentasi (`lvl`) dan informasi Parent Category.
 

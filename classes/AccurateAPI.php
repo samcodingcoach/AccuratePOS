@@ -1160,6 +1160,17 @@ class AccurateAPI {
 
         return $this->makeRequest($endpoint, 'POST', $data);
     }
+    public function saveWarehouse($data = array()) {
+        $endpoint = 'accurate/api/warehouse/save.do';
+        
+        if (!isset($data['name']) || trim($data['name']) === '') {
+            return array(
+                'success' => false,
+                'error'   => 'Parameter "name" (Nama Gudang) wajib diisi.'
+            );
+        }
 
+        return $this->makeRequest($endpoint, 'POST', $data);
+    }
 }
 ?>
