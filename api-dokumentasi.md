@@ -595,6 +595,14 @@ Mengambil informasi detail untuk satu akun perkiraan (GL Account).
   - `no` (Opsional - String): Nomor akun perkiraan.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail akun perkiraan.
 
+### 28.2 API Saldo Neraca COA (Balance Sheet Amount)
+Mengambil saldo total dari seluruh akun bertipe Neraca (Balance Sheet) pada tanggal tertentu.
+
+- **URL:** `/api/coa/saldo-neraca.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `asOfDate` (Opsional - String): Tanggal cut-off untuk penarikan saldo (format: `DD/MM/YYYY`, contoh: `13/01/2026`). Jika tidak diisi, otomatis akan menggunakan tanggal hari ini.
+- **Response Sukses (200 OK):** Mengembalikan total nominal saldo neraca.
 ### 29. API Daftar Akun Kas & Bank
 Mengambil daftar akun perkiraan khusus kategori **Kas & Bank**. Sangat berguna untuk memilih metode pelunasan pembayaran.
 *Catatan Performa:* Endpoint ini juga menerapkan _Eager Loading_ yang sama seperti Daftar COA.

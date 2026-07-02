@@ -1186,5 +1186,16 @@ class AccurateAPI {
         $endpoint .= '?' . http_build_query($params);
         return $this->makeRequest($endpoint, 'GET');
     }
+    public function getBSAccountAmount($asOfDate) {
+        if (empty($asOfDate)) {
+            return array('success' => false, 'error' => 'Parameter asOfDate wajib diisi', 'data' => null);
+        }
+
+        $endpoint = 'accurate/api/glaccount/get-bs-account-amount.do';
+        $params = array('asOfDate' => $asOfDate);
+
+        $endpoint .= '?' . http_build_query($params);
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>
