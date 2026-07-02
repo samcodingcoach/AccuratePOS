@@ -43,13 +43,36 @@ try {
     if (isset($result['success']) && $result['success']) {
         
         // Ambil data payload dari Accurate
-        $coaData = $result['data']['d'] ?? [];
-        $paging  = $result['data']['sp'] ?? [];
+        $rawCoaData = $result['data']['d'] ?? [];
+        $paging     = $result['data']['sp'] ?? [];
+        $enrichedCoa = [];
+
+        // Hapus batas waktu eksekusi script agar tidak timeout (karena proses akan lama)
+        set_time_limit(0);
+
+        foreach ($rawCoaData as $coa) {
+            $coaId = $coa['id'];
+            $detailRes = $api->getGLAccountDetail($coaId);
+            
+            if ($detailRes['success'] && isset($detailRes['data']['d'])) {
+                $d = $detailRes['data']['d'];
+                // Perkaya dengan field detail
+                $coa['balance']         = $d['balance'] ?? ($coa['balance'] ?? 0);
+                $coa['accountTypeName'] = $d['accountTypeName'] ?? ($coa['accountTypeName'] ?? '');
+                $coa['lvl']             = $d['lvl'] ?? ($coa['lvl'] ?? 1);
+                $coa['asOf']            = $d['asOf'] ?? ($coa['asOf'] ?? '');
+            }
+            $enrichedCoa[] = $coa;
+
+            // Rate Limiting: Accurate melarang lebih dari 8 hit/detik
+            // usleep(150000) = Jeda 150 milidetik (sekitar 6 hit per detik)
+            usleep(150000); 
+        }
 
         echo json_encode([
             'status'  => 'success',
             'message' => 'Data Akun Perkiraan (COA) Pendapatan berhasil dimuat',
-            'data'    => $coaData,
+            'data'    => $enrichedCoa,
             'pagination' => [
                 'current_page' => $page,
                 'total_page'   => isset($paging['pageCount']) ? (int)$paging['pageCount'] : 0,

@@ -576,21 +576,33 @@ Mengambil daftar ekspedisi atau jasa pengiriman yang tersedia di Accurate Online
 ## FASE 5: Akuntansi (COA), Promo, Payment Gateway & Harga
 
 ### 28. API Daftar Akun Perkiraan (Chart of Account)
-Mengambil daftar akun perkiraan (COA) untuk kategori **Pendapatan / Account Receivable** dari Accurate. Berguna untuk memetakan akun saat terjadi transaksi.
+Mengambil daftar akun perkiraan (COA) untuk kategori **Pendapatan / Account Receivable** dari Accurate. 
+*Catatan Performa:* Endpoint ini menerapkan _Eager Loading_ dengan _Rate Limiter_ (sekitar 6 hit/detik) untuk memuat `lvl` dan `balance`. Waktu muat dapat berlangsung selama puluhan detik tergantung dari jumlah data.
 
 - **URL:** `/api/coa/list.php`
 - **Method:** `GET`
 - **Parameter Query (Opsional):**
   - `page` (Integer), `limit` / `pageSize` (Integer), `search` (String).
-- **Response Sukses (200 OK):** Mengembalikan daftar COA kategori Pendapatan/Piutang.
+- **Response Sukses (200 OK):** Mengembalikan daftar COA kategori Pendapatan/Piutang yang diperkaya dengan *field* tambahan (`lvl`, `balance`, `accountTypeName`, `asOf`).
+
+### 28.1 API Detail Akun Perkiraan (COA Detail)
+Mengambil informasi detail untuk satu akun perkiraan (GL Account).
+
+- **URL:** `/api/coa/detail.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `id` (Wajib - Integer): ID unik dari akun perkiraan.
+  - `no` (Opsional - String): Nomor akun perkiraan.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail akun perkiraan.
 
 ### 29. API Daftar Akun Kas & Bank
 Mengambil daftar akun perkiraan khusus kategori **Kas & Bank**. Sangat berguna untuk memilih metode pelunasan pembayaran.
+*Catatan Performa:* Endpoint ini juga menerapkan _Eager Loading_ yang sama seperti Daftar COA.
 
 - **URL:** `/api/coa/list-kasbank.php`
 - **Method:** `GET`
 - **Parameter Query (Opsional):** Sama seperti list COA biasa.
-- **Response Sukses (200 OK):** Mengembalikan daftar COA Kas & Bank.
+- **Response Sukses (200 OK):** Mengembalikan daftar COA Kas & Bank beserta *field* utuhnya (`lvl`, `balance`, dsb).
 
 ### 30. API Daftar Promo Aktif (Lokal)
 Mengambil daftar promo/diskon yang tersimpan di dalam **Database Lokal POS**, otomatis difilter berdasarkan yang masih aktif, kuota masih tersedia, dan tanggal promo masih valid.

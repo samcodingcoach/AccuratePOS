@@ -980,7 +980,7 @@ class AccurateAPI {
         $defaultParams = array(
             'sp.pageSize' => 100,
             'sp.page'     => 1,
-            'fields'      => 'id,name,no'
+            'fields'      => 'id,name,no,balance,accountTypeName,lvl,asOf'
         );
         
         // 2. Ambil custom parameter dari request klien
@@ -1027,7 +1027,7 @@ class AccurateAPI {
         $defaultParams = array(
             'sp.pageSize' => 100,
             'sp.page'     => 1,
-            'fields'      => 'id,name,no'
+            'fields'      => 'id,name,no,balance,accountTypeName,lvl,asOf'
         );
         
         // 2. Ambil custom parameter dari request klien
@@ -1171,6 +1171,20 @@ class AccurateAPI {
         }
 
         return $this->makeRequest($endpoint, 'POST', $data);
+    }
+
+    public function getGLAccountDetail($id, $no = '') {
+        if (empty($id) && empty($no)) {
+            return array('success' => false, 'error' => 'Parameter ID atau Nomor Akun wajib diisi', 'data' => null);
+        }
+
+        $endpoint = 'accurate/api/glaccount/detail.do';
+        $params = array();
+        if (!empty($id)) $params['id'] = $id;
+        if (!empty($no)) $params['no'] = $no;
+
+        $endpoint .= '?' . http_build_query($params);
+        return $this->makeRequest($endpoint, 'GET');
     }
 }
 ?>
