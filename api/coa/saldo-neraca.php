@@ -47,10 +47,35 @@ try {
             return $parentB - $parentA;
         });
 
+        // 3. Kelompokkan Data (Grouping) berdasarkan accountType
+        $groupedData = [
+            'Aset (Aktiva)' => [],
+            'Liabilitas (Hutang)' => [],
+            'Ekuitas (Modal)' => []
+        ];
+
+        foreach ($filteredData as $item) {
+            $type = $item['accountType'] ?? '';
+
+            if (in_array($type, ['CASH_BANK', 'ACCOUNT_RECEIVABLE', 'INVENTORY', 'FIXED_ASSET', 'ACCUMULATED_DEPRECIATION', 'OTHER_CURRENT_ASSET', 'OTHER_ASSET'])) {
+                $groupedData['Aset (Aktiva)'][] = $item;
+            } elseif (in_array($type, ['ACCOUNT_PAYABLE', 'OTHER_CURRENT_LIABILITY', 'LONG_TERM_LIABILITY'])) {
+                $groupedData['Liabilitas (Hutang)'][] = $item;
+            } elseif ($type === 'EQUITY') {
+                $groupedData['Ekuitas (Modal)'][] = $item;
+            } else {
+                // Tampung jika ada tipe akun di luar yang disebutkan
+                if (!isset($groupedData['Lainnya'])) {
+                    $groupedData['Lainnya'] = [];
+                }
+                $groupedData['Lainnya'][] = $item;
+            }
+        }
+
         echo json_encode([
             'status'  => 'success',
             'message' => 'Saldo neraca akun perkiraan berhasil diambil',
-            'data'    => $filteredData
+            'data'    => $groupedData
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     } else {
         http_response_code(400);
