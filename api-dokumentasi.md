@@ -201,7 +201,19 @@ Mengambil informasi detail untuk sebuah gudang.
 - **Parameter Query:**
   - `id` (Wajib - Integer): ID unik dari gudang.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail gudang.
-
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": {
+          "id": 100,
+          "name": "Gudang Utama",
+          "street": "Jl. Kesejahteraan",
+          "province": "KALIMANTAN TIMUR",
+          "pic": "Budi"
+      }
+  }
+  ```
 ### 7.2 API Update Gudang (Update Warehouse)
 Memperbarui informasi data gudang di Accurate Online berdasarkan ID gudang.
 
@@ -216,7 +228,17 @@ Memperbarui informasi data gudang di Accurate Online berdasarkan ID gudang.
   - `scrapWarehouse` (Opsional - Boolean): Tanda jika gudang ini adalah gudang barang rusak. Default akan dibaca `true` jika tidak dikirim, sesuai spesifikasi internal.
   - `suspended` (Opsional - Boolean): Tanda jika gudang dinonaktifkan. Default `false`.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail gudang yang baru diperbarui.
-
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Gudang berhasil diperbarui",
+      "data": {
+          "id": 100,
+          "name": "Gudang Utama"
+      }
+  }
+  ```
 ### 8. API Kategori Barang (Item Category)
 Mengambil daftar kategori barang, dilengkapi perhitungan Level Indentasi (`lvl`) dan informasi Parent Category.
 
@@ -252,6 +274,18 @@ Mengambil detail informasi spesifik untuk satu kategori barang.
 - **Parameter Query:**
   - `id` (Wajib - Integer): ID kategori barang.
 - **Response Sukses (200 OK):** Mengembalikan object detail kategori dari Accurate.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": {
+          "id": 1,
+          "name": "Elektronik",
+          "lvl": 1,
+          "parent_id": null
+      }
+  }
+  ```
 
 ### 9.1 API Simpan Kategori Barang (Save Item Category)
 Menyimpan atau membuat Kategori Barang (Item Category) baru ke Accurate Online.
@@ -263,7 +297,18 @@ Menyimpan atau membuat Kategori Barang (Item Category) baru ke Accurate Online.
   - `defaultCategory` (Opsional - Boolean): Apakah ini kategori default (`true`/`false`).
   - `parentName` (Opsional - String): Nama dari kategori induk (jika ini merupakan sub-kategori). Dapat diisi dengan string kosong `""` jika tidak ingin memiliki kategori induk.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail kategori yang baru saja disimpan.
-
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Kategori barang berhasil disimpan",
+      "data": {
+          "id": 2,
+          "name": "Aksesoris",
+          "parentName": "Elektronik"
+      }
+  }
+  ```
 ### 9.2 API Update Kategori Barang (Update Item Category)
 Memperbarui Kategori Barang (Item Category) yang sudah ada di Accurate Online.
 
@@ -275,6 +320,17 @@ Memperbarui Kategori Barang (Item Category) yang sudah ada di Accurate Online.
   - `defaultCategory` (Opsional - Boolean): Apakah ini kategori default (`true`/`false`).
   - `parentName` (Opsional - String): Nama dari kategori induk (jika ini merupakan sub-kategori). Dapat diisi dengan string kosong `""` untuk **menghapus** relasi kategori induk yang sudah ada sebelumnya.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail kategori yang baru saja diperbarui.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Kategori barang berhasil diperbarui",
+      "data": {
+          "id": 2,
+          "name": "Aksesoris Elektronik"
+      }
+  }
+  ```
 ### 10. API Barang (Item List - Accurate)
 Mengambil daftar barang **langsung dari Accurate Online** dengan versi yang lebih ringan (hanya mengekstrak field penting seperti stok `balance`, harga `price`, dan gambar `image`). 
 
@@ -316,6 +372,23 @@ Mengambil daftar barang **dari database lokal (MySQL)** POS, dilengkapi fitur fi
   - `barcode` (String): Filter pencarian spesifik barcode barang.
   - `start_date` & `end_date` (String): Filter berdasarkan rentang waktu sinkronisasi (`last_sync`).
 - **Response Sukses (200 OK):** Mirip dengan struktur list Accurate, bersumber dari tabel `item`.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": [
+          {
+              "id": 100,
+              "item_no": "BRG-001",
+              "name": "Kopi Susu",
+              "barcode": "899123456789",
+              "price": 15000,
+              "balance": 50
+          }
+      ],
+      "pagination": { ... }
+  }
+  ```
 
 ### 12. API Detail Barang
 Mengambil seluruh data mentah (Raw Data) informasi barang secara spesifik. Tersedia dalam 3 Endpoint berdasarkan cara mencarinya:
@@ -327,6 +400,19 @@ Mengambil seluruh data mentah (Raw Data) informasi barang secara spesifik. Terse
 - **Berdasarkan Nomor atau Serial Number (SN):** `/api/item/search_byNoItem.php`
   - Parameter: `no` (Wajib). Endpoint ini bisa mendeteksi nomor barang *maupun* nomor seri (SN).
 
+**Contoh Output JSON (Detail Barang):**
+```json
+{
+    "status": "success",
+    "data": {
+        "id": 100,
+        "item_no": "BRG-001",
+        "name": "Kopi Susu",
+        "unitPrice": 15000
+    }
+}
+```
+
 ### 13. API Harga Barang (Raw Price)
 Mengambil informasi harga jual barang beserta simulasinya.
 
@@ -336,6 +422,17 @@ Mengambil informasi harga jual barang beserta simulasinya.
   - `no` atau `upcNo` (Salah satu Wajib).
   - `branchName`, `currencyCode`, `discountCategoryName`, `effectiveDate`, `priceCategoryName`.
 - **Response Sukses (200 OK):** Mengembalikan data mentah harga jual dari Accurate.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": {
+          "no": "BRG-001",
+          "price": 15000,
+          "discountAmount": 0
+      }
+  }
+  ```
 
 ### 14. API Stok Barang 
 Mengambil informasi ketersediaan stok barang. Terdapat 3 Endpoint:
@@ -346,6 +443,20 @@ Mengambil informasi ketersediaan stok barang. Terdapat 3 Endpoint:
   - Parameter: `warehouse` atau `warehouseName` (Opsional), `page`, `limit`.
 - **Serial Number by Warehouse:** `/api/item/serial_byNo.php`
   - Parameter: `itemNo` atau `no` (Wajib). Mengembalikan rincian nomor seri barang per gudang.
+
+**Contoh Output JSON (Informasi Stok Mentah):**
+```json
+{
+    "status": "success",
+    "data": [
+        {
+            "warehouseId": 1,
+            "warehouseName": "Gudang Utama",
+            "quantity": 50
+        }
+    ]
+}
+```
 
 ### 15. API Agregator Stok & Harga (Stokharga)
 Endpoint spesial yang menggabungkan (mengagregasi) pemanggilan informasi **Harga Jual** dan ketersediaan **Stok Total** secara bersamaan. Menggunakan jeda waktu (`sleep(1)`) untuk menghindari rate-limit Accurate API.
@@ -386,6 +497,21 @@ Mengambil daftar riwayat faktur penjualan yang ada di Accurate Online.
 - **Parameter Query (Opsional):**
   - `limit` (Integer): Jumlah maksimal data per halaman.
 - **Response Sukses (200 OK):** Mengembalikan _array_ riwayat faktur penjualan (struktur JSON dari Accurate).
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": [
+          {
+              "id": 12345,
+              "number": "INV-26-0001",
+              "transDate": "22/06/2026",
+              "totalAmount": 150000,
+              "customerName": "Umum"
+          }
+      ]
+  }
+  ```
 
 ### 17. API Detail Faktur Penjualan
 Mengambil informasi lengkap (detail) dari satu faktur penjualan tertentu.
@@ -395,6 +521,24 @@ Mengambil informasi lengkap (detail) dari satu faktur penjualan tertentu.
 - **Parameter Query:**
   - `id` atau `number` (Salah Satu Wajib): ID unik sistem atau Nomor Faktur.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail faktur dari Accurate.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": {
+          "id": 12345,
+          "number": "INV-26-0001",
+          "transDate": "22/06/2026",
+          "detailItem": [
+              {
+                  "item": { "name": "Kopi Susu", "no": "BRG-001" },
+                  "quantity": 10,
+                  "unitPrice": 15000
+              }
+          ]
+      }
+  }
+  ```
 
 ### 18. API Detail Faktur Penjualan (Ter-Filter & Ringan)
 Sama seperti detail biasa, namun menspesifikkan filter tanggal/pelanggan dan merampingkan data yang dibalas (membuang field yang tidak perlu) agar JSON response menjadi sangat ringan.
@@ -404,6 +548,20 @@ Sama seperti detail biasa, namun menspesifikkan filter tanggal/pelanggan dan mer
 - **Parameter Query (Opsional):**
   - `customerNo`, `fromDate`, `toDate`, `page`, `pageSize`.
 - **Response Sukses (200 OK):** Mengembalikan _array_ yang field-nya hanya berisi: `transDate`, `invoiceTime`, `dueDate`, `paymentTermId`, `number`, `subTotal`, `salesAmountBase`, `status`.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": [
+          {
+              "number": "INV-26-0001",
+              "transDate": "22/06/2026",
+              "subTotal": 150000,
+              "status": "PAID"
+          }
+      ]
+  }
+  ```
 
 ### 19. API Simpan Faktur Penjualan (Create / Update Sales Invoice)
 Menyimpan transaksi kasir (faktur penjualan) baru ke Accurate Online. API ini juga melakukan sanitasi otomatis untuk mengubah format tanggal (`YYYY-MM-DD` ke `dd/mm/yyyy`) dan menghilangkan tanda titik pada format ribuan nilai uang.
@@ -451,6 +609,21 @@ Mengambil daftar pelunasan/penerimaan uang atas faktur penjualan.
 - **Parameter Query (Opsional):**
   - `limit`, `page`, `start_date`, `end_date`, `customerNo`, `number`.
 - **Response Sukses (200 OK):** Mengembalikan daftar pelunasan dari Accurate.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": [
+          {
+              "id": 98765,
+              "number": "SR-26-0001",
+              "transDate": "22/06/2026",
+              "chequeAmount": 150000,
+              "customer": { "name": "Umum" }
+          }
+      ]
+  }
+  ```
 
 ### 22. API Detail Penerimaan Penjualan
 Mengambil informasi detail untuk satu data penerimaan penjualan/pelunasan.
@@ -460,6 +633,24 @@ Mengambil informasi detail untuk satu data penerimaan penjualan/pelunasan.
 - **Parameter Query:**
   - `id` atau `number` (Salah satu Wajib).
 - **Response Sukses (200 OK):** Mengembalikan object data detail pelunasan dari Accurate.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": {
+          "id": 98765,
+          "number": "SR-26-0001",
+          "transDate": "22/06/2026",
+          "chequeAmount": 150000,
+          "detailInvoice": [
+              {
+                  "invoiceNumber": "INV-26-0001",
+                  "paymentAmount": 150000
+              }
+          ]
+      }
+  }
+  ```
 
 ### 23. API Simpan Penerimaan Penjualan (Create Sales Receipt)
 Mencatat pelunasan (pembayaran uang) atas faktur yang sudah dibuat. 
@@ -498,6 +689,21 @@ Mengambil daftar pelanggan (Customer) dari Accurate Online.
   - `customerNo` (String): Mencari pelanggan berdasarkan ID/Nomor Pelanggan.
   - `name` (String): Mencari pelanggan berdasarkan Nama.
 - **Response Sukses (200 OK):** Mengembalikan _array_ riwayat pelanggan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": [
+          {
+              "id": 10,
+              "customerNo": "CUST-01",
+              "name": "Pelanggan Umum",
+              "mobilePhone": "08123456789"
+          }
+      ],
+      "pagination": { ... }
+  }
+  ```
 
 ### 25. API Daftar Karyawan / Salesman (Employee List)
 Mengambil daftar karyawan (termasuk salesman) dari Accurate Online.
@@ -513,6 +719,21 @@ Mengambil daftar karyawan (termasuk salesman) dari Accurate Online.
   - `name` (String): Mencari berdasarkan nama karyawan.
   - `sales` (Boolean/String): Filter untuk menampilkan hanya karyawan yang berstatus Salesman.
 - **Response Sukses (200 OK):** Mengembalikan _array_ daftar karyawan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": [
+          {
+              "id": 5,
+              "number": "EMP-001",
+              "name": "Budi",
+              "salesman": true
+          }
+      ],
+      "pagination": { ... }
+  }
+  ```
 
 ### 26. API Detail Karyawan (Employee Detail)
 Mengambil informasi lengkap (detail) dari satu profil karyawan.
@@ -522,6 +743,19 @@ Mengambil informasi lengkap (detail) dari satu profil karyawan.
 - **Parameter Query:**
   - `id` atau `number` (Salah Satu Wajib): ID unik sistem atau Nomor Karyawan.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail karyawan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": {
+          "id": 5,
+          "number": "EMP-001",
+          "name": "Budi",
+          "salutation": "MR",
+          "salesman": true
+      }
+  }
+  ```
 
 ### 26.1 API Simpan Karyawan (Save / Update Employee)
 Menyimpan data karyawan baru atau memperbarui data karyawan yang sudah ada di Accurate Online.
@@ -544,6 +778,18 @@ Menyimpan data karyawan baru atau memperbarui data karyawan yang sudah ada di Ac
   - `email` (Opsional - String): Alamat email karyawan.
   - `mobilePhone` (Opsional - String): Nomor handphone.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail karyawan yang baru saja disimpan atau diperbarui.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data karyawan berhasil disimpan",
+      "data": {
+          "id": 6,
+          "name": "Andi",
+          "number": "EMP-002"
+      }
+  }
+  ```
 ### 27. API Daftar Jasa Pengiriman (Shipment List)
 Mengambil daftar ekspedisi atau jasa pengiriman yang tersedia di Accurate Online. API ini telah dipangkas sedemikian rupa sehingga hanya mengembalikan **ID** dan **Nama** pengiriman saja.
 
@@ -584,6 +830,25 @@ Mengambil daftar akun perkiraan (COA) untuk kategori **Pendapatan / Account Rece
 - **Parameter Query (Opsional):**
   - `page` (Integer), `limit` / `pageSize` (Integer), `search` (String).
 - **Response Sukses (200 OK):** Mengembalikan daftar COA kategori Pendapatan/Piutang yang diperkaya dengan *field* tambahan (`lvl`, `balance`, `accountTypeName`, `asOf`).
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": [
+          {
+              "id": 20,
+              "no": "4100",
+              "name": "Pendapatan Penjualan",
+              "accountType": "REVENUE",
+              "accountTypeName": "Pendapatan",
+              "lvl": 1,
+              "balance": 15000000,
+              "asOf": "22/06/2026"
+          }
+      ],
+      "pagination": { ... }
+  }
+  ```
 
 ### 28.1 API Detail Akun Perkiraan (COA Detail)
 Mengambil informasi detail untuk satu akun perkiraan (GL Account).
@@ -594,6 +859,18 @@ Mengambil informasi detail untuk satu akun perkiraan (GL Account).
   - `id` (Wajib - Integer): ID unik dari akun perkiraan.
   - `no` (Opsional - String): Nomor akun perkiraan.
 - **Response Sukses (200 OK):** Mengembalikan _object_ detail akun perkiraan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": {
+          "id": 20,
+          "no": "4100",
+          "name": "Pendapatan Penjualan",
+          "accountType": "REVENUE"
+      }
+  }
+  ```
 
 ### 28.2 API Saldo Neraca COA (Balance Sheet Amount)
 Mengambil daftar saldo seluruh akun bertipe Neraca (Balance Sheet) pada tanggal tertentu. 
@@ -603,7 +880,48 @@ Mengambil daftar saldo seluruh akun bertipe Neraca (Balance Sheet) pada tanggal 
 - **Method:** `GET`
 - **Parameter Query:**
   - `asOfDate` (Opsional - String): Tanggal cut-off untuk penarikan saldo (format: `DD/MM/YYYY`, contoh: `13/01/2026`). Jika tidak diisi, otomatis akan menggunakan tanggal hari ini.
-- **Response Sukses (200 OK):** Mengembalikan _nested object/array_ berisi `Aset (Aktiva)`, `Liabilitas (Hutang)`, dan `Ekuitas (Modal)`.
+- **Response Sukses (200 OK):** Mengembalikan _nested object_ berisi `data` yang memuat kelompok utama (`aset-aktiva`, `liabilitas-hutang`, `equitas-modal`). Tiap kelompok memuat `total` dan `items`. Selain itu, terdapat _object_ `summary` yang mengembalikan perhitungan `totalAset`, `totalLiabilitasEkuitas`, dan `selisih`.
+  
+  **Contoh Output JSON:**
+  ```json
+  {
+    "status": "success",
+    "message": "Saldo neraca akun perkiraan berhasil diambil",
+    "summary": {
+      "totalAset": 157103102.1,
+      "totalLiabilitasEkuitas": 154761233,
+      "selisih": 2341869.1
+    },
+    "data": {
+      "aset-aktiva": {
+        "total": 157103102.1,
+        "items": [
+          {
+            "id": 123,
+            "no": "1100",
+            "name": "Kas Kecil",
+            "accountType": "CASH_BANK",
+            "amount": 5000000,
+            "lvl": 1,
+            "isParent": true
+          }
+        ]
+      },
+      "liabilitas-hutang": {
+        "total": 154761233,
+        "items": []
+      },
+      "equitas-modal": {
+        "total": 0,
+        "items": []
+      },
+      "lainnya": {
+        "total": 0,
+        "items": []
+      }
+    }
+  }
+  ```
 ### 29. API Daftar Akun Kas & Bank
 Mengambil daftar akun perkiraan khusus kategori **Kas & Bank**. Sangat berguna untuk memilih metode pelunasan pembayaran.
 *Catatan Performa:* Endpoint ini juga menerapkan _Eager Loading_ yang sama seperti Daftar COA.
@@ -612,6 +930,23 @@ Mengambil daftar akun perkiraan khusus kategori **Kas & Bank**. Sangat berguna u
 - **Method:** `GET`
 - **Parameter Query (Opsional):** Sama seperti list COA biasa.
 - **Response Sukses (200 OK):** Mengembalikan daftar COA Kas & Bank beserta *field* utuhnya (`lvl`, `balance`, dsb).
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": [
+          {
+              "id": 15,
+              "no": "1101",
+              "name": "Kasir Kas",
+              "accountType": "CASH_BANK",
+              "lvl": 1,
+              "balance": 5000000
+          }
+      ],
+      "pagination": { ... }
+  }
+  ```
 
 ### 30. API Daftar Promo Aktif (Lokal)
 Mengambil daftar promo/diskon yang tersimpan di dalam **Database Lokal POS**, otomatis difilter berdasarkan yang masih aktif, kuota masih tersedia, dan tanggal promo masih valid.
@@ -624,6 +959,21 @@ Mengambil daftar promo/diskon yang tersimpan di dalam **Database Lokal POS**, ot
   - `no` (String): Filter berdasarkan Nomor Barang (`item_no`).
   - `category` (String): Filter berdasarkan kategori pelanggan (`category_user`).
 - **Response Sukses (200 OK):** Mengembalikan data promo, termasuk besaran `percentage` dan sisa `kuota`.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": [
+          {
+              "id_promo": 1,
+              "nama_promo": "Diskon Akhir Tahun",
+              "percentage": 10,
+              "kuota": 100,
+              "item_no": "BRG-001"
+          }
+      ]
+  }
+  ```
 
 ### 31. API Penggunaan Kuota Promo (Update Kuota)
 Mengurangi kuota promo di database lokal ketika transaksi penjualan menggunakan promo tersebut berhasil.
@@ -634,6 +984,14 @@ Mengurangi kuota promo di database lokal ketika transaksi penjualan menggunakan 
   - `id_promo` (Wajib - Integer): ID Promo.
   - `kuota` (Wajib - Integer): Jumlah kuota yang ingin dikurangi.
 - **Response Sukses (200 OK):** Mengembalikan pesan sukses dan informasi kuota yang telah dikurangi.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Kuota promo berhasil dikurangi",
+      "sisa_kuota": 99
+  }
+  ```
 
 ### 32. API Pembatalan Kuota Promo (Cancel Kuota)
 Mengembalikan / menambahkan ulang kuota promo di database lokal jika transaksi batal atau dihapus.
@@ -644,6 +1002,14 @@ Mengembalikan / menambahkan ulang kuota promo di database lokal jika transaksi b
   - `id_promo` (Wajib - Integer): ID Promo.
   - `kuota` (Wajib - Integer): Jumlah kuota yang ingin ditambahkan kembali.
 - **Response Sukses (200 OK):** Mengembalikan pesan sukses dan informasi kuota yang telah ditambahkan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Kuota promo berhasil dikembalikan",
+      "sisa_kuota": 100
+  }
+  ```
 
 ### 33. API Kredensial Payment Gateway (Midtrans)
 Mengambil daftar konfigurasi kredensial (Merchant ID, Client Key, Server Key) Midtrans dari Database Lokal POS.
@@ -651,6 +1017,17 @@ Mengambil daftar konfigurasi kredensial (Merchant ID, Client Key, Server Key) Mi
 - **URL:** `/api/midtrans/list.php`
 - **Method:** `GET`
 - **Response Sukses (200 OK):** Mengembalikan data koneksi Midtrans.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": {
+          "merchant_id": "M-12345",
+          "client_key": "Mid-client-abc",
+          "server_key": "Mid-server-def"
+      }
+  }
+  ```
 
 ### 34. API Detail Penyesuaian Harga (Selling Price Adjustment)
 Mengambil informasi detail mengenai penyesuaian/perubahan harga jual secara spesifik dari Accurate Online.
@@ -660,3 +1037,15 @@ Mengambil informasi detail mengenai penyesuaian/perubahan harga jual secara spes
 - **Parameter Query:**
   - `id` atau `number` (Salah Satu Wajib).
 - **Response Sukses (200 OK):** Mengembalikan data mentah penyesuaian harga dari Accurate.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "data": {
+          "id": 12,
+          "number": "ADJ-001",
+          "effectiveDate": "22/06/2026",
+          "details": []
+      }
+  }
+  ```

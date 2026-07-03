@@ -47,34 +47,68 @@ try {
             return $parentB - $parentA;
         });
 
-        // 3. Kelompokkan Data (Grouping) berdasarkan accountType
+        // 3. Kelompokkan Data (Grouping) berdasarkan accountType dan Hitung Total
         $groupedData = [
-            'Aset (Aktiva)' => [],
-            'Liabilitas (Hutang)' => [],
-            'Ekuitas (Modal)' => []
+            'aset-aktiva' => [
+                'total' => 0,
+                'items' => []
+            ],
+            'liabilitas-hutang' => [
+                'total' => 0,
+                'items' => []
+            ],
+            'equitas-modal' => [
+                'total' => 0,
+                'items' => []
+            ]
         ];
 
         foreach ($filteredData as $item) {
             $type = $item['accountType'] ?? '';
+            // Jadikan 2 angka di belakang koma untuk amount masing-masing akun
+            $amount = round((float)($item['amount'] ?? 0), 2);
+            $item['amount'] = $amount; 
+            
+            $lvl = isset($item['lvl']) ? (int)$item['lvl'] : 0;
+            $isParent = !empty($item['isParent']);
+
+            // Kondisi penambahan total: Khusus level 1 DAN isParent 1
+            $shouldAddToTotal = ($lvl === 1 && $isParent);
 
             if (in_array($type, ['CASH_BANK', 'ACCOUNT_RECEIVABLE', 'INVENTORY', 'FIXED_ASSET', 'ACCUMULATED_DEPRECIATION', 'OTHER_CURRENT_ASSET', 'OTHER_ASSET'])) {
-                $groupedData['Aset (Aktiva)'][] = $item;
+                $groupedData['aset-aktiva']['items'][] = $item;
+                if ($shouldAddToTotal) $groupedData['aset-aktiva']['total'] = round($groupedData['aset-aktiva']['total'] + $amount, 2);
             } elseif (in_array($type, ['ACCOUNT_PAYABLE', 'OTHER_CURRENT_LIABILITY', 'LONG_TERM_LIABILITY'])) {
-                $groupedData['Liabilitas (Hutang)'][] = $item;
+                $groupedData['liabilitas-hutang']['items'][] = $item;
+                if ($shouldAddToTotal) $groupedData['liabilitas-hutang']['total'] = round($groupedData['liabilitas-hutang']['total'] + $amount, 2);
             } elseif ($type === 'EQUITY') {
-                $groupedData['Ekuitas (Modal)'][] = $item;
+                $groupedData['equitas-modal']['items'][] = $item;
+                if ($shouldAddToTotal) $groupedData['equitas-modal']['total'] = round($groupedData['equitas-modal']['total'] + $amount, 2);
             } else {
                 // Tampung jika ada tipe akun di luar yang disebutkan
-                if (!isset($groupedData['Lainnya'])) {
-                    $groupedData['Lainnya'] = [];
+                if (!isset($groupedData['lainnya'])) {
+                    $groupedData['lainnya'] = [
+                        'total' => 0,
+                        'items' => []
+                    ];
                 }
-                $groupedData['Lainnya'][] = $item;
+                $groupedData['lainnya']['items'][] = $item;
+                if ($shouldAddToTotal) $groupedData['lainnya']['total'] = round($groupedData['lainnya']['total'] + $amount, 2);
             }
         }
+
+        $totalAset = round($groupedData['aset-aktiva']['total'] ?? 0, 2);
+        $totalLiabilitasEkuitas = round(($groupedData['liabilitas-hutang']['total'] ?? 0) + ($groupedData['equitas-modal']['total'] ?? 0), 2);
+        $selisih = round($totalAset - $totalLiabilitasEkuitas, 2);
 
         echo json_encode([
             'status'  => 'success',
             'message' => 'Saldo neraca akun perkiraan berhasil diambil',
+            'summary' => [
+                'totalAset'              => $totalAset,
+                'totalLiabilitasEkuitas' => $totalLiabilitasEkuitas,
+                'selisih'                => $selisih
+            ],
             'data'    => $groupedData
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     } else {
