@@ -1197,5 +1197,17 @@ class AccurateAPI {
         $endpoint .= '?' . http_build_query($params);
         return $this->makeRequest($endpoint, 'GET');
     }
+
+    public function getPLAccountAmount($fromDate, $toDate) {
+        if (empty($fromDate) || empty($toDate)) {
+            return array('success' => false, 'error' => 'Parameter fromDate dan toDate wajib diisi', 'data' => null);
+        }
+
+        $endpoint = 'accurate/api/glaccount/get-pl-account-amount.do';
+        $params = array('fromDate' => $fromDate, 'toDate' => $toDate);
+
+        $endpoint .= '?' . http_build_query($params);
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>

@@ -922,6 +922,54 @@ Mengambil daftar saldo seluruh akun bertipe Neraca (Balance Sheet) pada tanggal 
     }
   }
   ```
+
+### 28.3 API Rugi Laba COA (Profit & Loss Amount)
+Mengambil daftar nilai/saldo akun yang tergolong dalam Rugi Laba (Profit & Loss) untuk suatu rentang waktu tertentu.
+
+- **URL:** `/api/coa/rugilaba.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `fromDate` (Opsional - String): Tanggal mulai penarikan data (format: `DD/MM/YYYY`, contoh: `01/02/2026`). Jika tidak diisi, otomatis mengambil **awal bulan ini**.
+  - `toDate` (Opsional - String): Tanggal akhir penarikan data (format: `DD/MM/YYYY`, contoh: `28/02/2026`). Jika tidak diisi, otomatis mengambil **akhir bulan ini**.
+- **Response Sukses (200 OK):** Mengembalikan _array_ data mentah dari Accurate yang memuat nilai-nilai dari setiap akun Rugi Laba.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data rugi laba berhasil diambil",
+      "summary": {
+          "totalPendapatan": 25000000,
+          "hpp": 10000000,
+          "labaKotor": 15000000,
+          "bebanOperasional": 5000000,
+          "labaOperasional": 10000000,
+          "pendapatanLainLain": 1000000,
+          "bebanLainLain": 500000,
+          "labaBersih": 10500000
+      },
+      "data": {
+          "revenue": {
+              "total": 25000000,
+              "items": [
+                  {
+                      "id": 200,
+                      "no": "4000",
+                      "name": "Pendapatan Usaha",
+                      "accountType": "REVENUE",
+                      "amount": 25000000,
+                      "lvl": 1,
+                      "isParent": true
+                  }
+              ]
+          },
+          "cogs": { "total": 10000000, "items": [] },
+          "expense": { "total": 5000000, "items": [] },
+          "other-income": { "total": 1000000, "items": [] },
+          "other-expense": { "total": 500000, "items": [] },
+          "lainnya": { "total": 0, "items": [] }
+      }
+  }
+  ```
 ### 29. API Daftar Akun Kas & Bank
 Mengambil daftar akun perkiraan khusus kategori **Kas & Bank**. Sangat berguna untuk memilih metode pelunasan pembayaran.
 *Catatan Performa:* Endpoint ini juga menerapkan _Eager Loading_ yang sama seperti Daftar COA.
