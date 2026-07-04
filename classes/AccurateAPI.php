@@ -1209,5 +1209,38 @@ class AccurateAPI {
         $endpoint .= '?' . http_build_query($params);
         return $this->makeRequest($endpoint, 'GET');
     }
+
+    public function getStockOpnameOrderList($params = array(), $page = 1, $limit = 100) {
+        $endpoint = 'accurate/api/stock-opname-order/list.do';
+        
+        $defaultParams = array(
+            'sp.pageSize' => $limit,
+            'sp.page' => $page,
+        );
+        
+        $finalParams = array_merge($defaultParams, $params);
+        $endpoint .= '?' . http_build_query($finalParams);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
+    public function getStockOpnameOrderDetail($id = null, $number = null) {
+        $endpoint = 'accurate/api/stock-opname-order/detail.do';
+        $params = array();
+
+        if (!empty($id)) {
+            $params['id'] = $id;
+        } elseif (!empty($number)) {
+            $params['number'] = $number;
+        } else {
+            return array(
+                'success' => false,
+                'error' => 'Parameter ID atau Number wajib diisi'
+            );
+        }
+        
+        $endpoint .= '?' . http_build_query($params);
+        return $this->makeRequest($endpoint, 'GET');
+    }
 }
 ?>

@@ -931,7 +931,7 @@ Mengambil daftar nilai/saldo akun yang tergolong dalam Rugi Laba (Profit & Loss)
 - **Parameter Query:**
   - `fromDate` (Opsional - String): Tanggal mulai penarikan data (format: `DD/MM/YYYY`, contoh: `01/02/2026`). Jika tidak diisi, otomatis mengambil **awal bulan ini**.
   - `toDate` (Opsional - String): Tanggal akhir penarikan data (format: `DD/MM/YYYY`, contoh: `28/02/2026`). Jika tidak diisi, otomatis mengambil **akhir bulan ini**.
-- **Response Sukses (200 OK):** Mengembalikan _array_ data mentah dari Accurate yang memuat nilai-nilai dari setiap akun Rugi Laba.
+- **Response Sukses (200 OK):** Mengembalikan _nested object_ berisi `data` yang memuat kelompok akun Rugi Laba (`revenue`, `cogs`, `expense`, dll) beserta `total` dan `items` masing-masing. Terdapat juga _object_ `summary` yang mengkalkulasi `totalPendapatan`, `hpp`, `labaKotor`, `bebanOperasional`, `labaOperasional`, dan `labaBersih`.
   **Contoh Output JSON:**
   ```json
   {
@@ -1094,6 +1094,71 @@ Mengambil informasi detail mengenai penyesuaian/perubahan harga jual secara spes
           "number": "ADJ-001",
           "effectiveDate": "22/06/2026",
           "details": []
+      }
+  }
+  ```
+
+---
+
+## FASE 6: Modul Stok Opname
+
+### 35. API Daftar Perintah Stok Opname (Stock Opname Order List)
+Mengambil daftar perintah stok opname dari Accurate Online.
+
+- **URL:** `/api/stokopname-order/list.php`
+- **Method:** `GET`
+- **Parameter Query (Opsional):**
+  - `page` (Integer): Halaman data.
+  - `limit` (Integer): Jumlah maksimal data per halaman.
+  - `transDate` (String): Filter berdasarkan tanggal transaksi (format `DD/MM/YYYY`, contoh: `04/07/2026`).
+- **Response Sukses (200 OK):**
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data stok opname order berhasil diambil",
+      "data": [
+          {
+              "id": 1,
+              "number": "SOO-001",
+              "transDate": "04/07/2026",
+              "status": "DRAFT"
+          }
+      ],
+      "pagination": {
+          "page": 1,
+          "pageSize": 100,
+          "pageCount": 1,
+          "rowCount": 1
+      }
+  }
+  ```
+
+### 36. API Detail Perintah Stok Opname (Stock Opname Order Detail)
+Mengambil informasi lengkap (detail) dari satu perintah stok opname tertentu.
+
+- **URL:** `/api/stokopname-order/detail.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `id` atau `number` (Salah Satu Wajib): ID unik sistem atau Nomor Perintah Stok Opname.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail stok opname order dari Accurate.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Detail stok opname order berhasil diambil",
+      "data": {
+          "id": 1,
+          "number": "SOO-001",
+          "transDate": "04/07/2026",
+          "status": "DRAFT",
+          "detailItem": [
+              {
+                  "item": { "name": "Kopi Susu", "no": "BRG-001" },
+                  "quantity": 100,
+                  "unitName": "PCS"
+              }
+          ]
       }
   }
   ```
