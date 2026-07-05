@@ -1121,8 +1121,16 @@ Mengambil daftar perintah stok opname dari Accurate Online.
           {
               "id": 1,
               "number": "SOO-001",
+              "startDate": "03/07/2026",
+              "description": "Opname Gudang Utama Juli",
               "transDate": "04/07/2026",
-              "status": "DRAFT"
+              "branchName": "Pusat",
+              "personCharged": "Budi",
+              "warehouse": {
+                  "id": 1,
+                  "name": "Gudang Utama"
+              },
+              "statusName": "Draft"
           }
       ],
       "pagination": {
