@@ -1170,3 +1170,66 @@ Mengambil informasi lengkap (detail) dari satu perintah stok opname tertentu.
       }
   }
   ```
+
+### 37. API Daftar Hasil Stok Opname (Stock Opname Result List)
+Mengambil daftar hasil eksekusi stok opname dari Accurate Online.
+
+- **URL:** `/api/stokopname-result/list.php`
+- **Method:** `GET`
+- **Parameter Query (Opsional):**
+  - `page` (Integer): Halaman data.
+  - `limit` (Integer): Jumlah maksimal data per halaman.
+  - `search` (String): Pencarian umum berdasarkan kata kunci (nomor transaksi, keterangan, dll).
+  - `transDate` (String): Filter berdasarkan tanggal transaksi (format `DD/MM/YYYY`, contoh: `04/07/2026`).
+- **Response Sukses (200 OK):**
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data stok opname result berhasil diambil",
+      "data": [
+          {
+              "id": 1,
+              "number": "SOR-001",
+              "transDate": "04/07/2026",
+              "status": "DRAFT"
+          }
+      ],
+      "pagination": {
+          "page": 1,
+          "pageSize": 100,
+          "pageCount": 1,
+          "rowCount": 1
+      }
+  }
+  ```
+
+### 38. API Detail Hasil Stok Opname (Stock Opname Result Detail)
+Mengambil informasi lengkap (detail) dari satu hasil stok opname tertentu.
+
+- **URL:** `/api/stokopname-result/detail.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `id` atau `number` (Salah Satu Wajib): ID unik sistem atau Nomor Hasil Stok Opname.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail stok opname result dari Accurate.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Detail stok opname result berhasil diambil",
+      "data": {
+          "id": 1,
+          "number": "SOR-001",
+          "transDate": "04/07/2026",
+          "status": "DRAFT",
+          "detailItem": [
+              {
+                  "item": { "name": "Kopi Susu", "no": "BRG-001" },
+                  "actualQuantity": 98,
+                  "differenceQuantity": -2,
+                  "unitName": "PCS"
+              }
+          ]
+      }
+  }
+  ```
