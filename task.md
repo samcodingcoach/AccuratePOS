@@ -366,4 +366,71 @@ item/detail_byNo.php?no=100007
   }
 }
 
+stok opname list
+"data": [
+  {
+    "number": "OPR.00001",
+    "transDate": "04/07/2026",
+    "description": "Maaf telah memberika stok opname",
+    "transDateView": "04 Jul 2026",
+    "order": {
+      "number": "OPO.00001",
+    }
+  }
+],
 
+
+
+detail hasil stok opname 
+{
+  "status": "success",
+  "message": "Detail stok opname result berhasil diambil",
+  "data": {
+    "number": "OPR.00001",
+    "id": 50,
+    "order": {
+      "number": "OPO.00001",
+      "id": 50,
+      "startDate": "04/07/2026",
+      "status": "DONE",
+    },
+    "detailItem": [
+      {
+        "item": {
+          "unit1": {
+            "name": "Unit",
+          },
+          "name": "KRISBOW 4 INCI KIPAS ANGIN MEJA PERSONAL",
+          "no": "100016"
+        },
+        "quantity": 84,
+        "detailSerialNumber": [
+          {
+            "quantity": 1,
+            "serialNumber": {
+              "number": "KRB013",
+              "updateStockDate": "01/01/2026",
+            }
+          }
+        ]
+      },
+     
+      {
+        "item": {
+          "unit1": {
+           
+            "name": "Unit"
+           
+          },
+          "name": "POCO M7 (8GB/256GB) - Black",
+          "no": "100014"
+        },
+        "quantity": 0,
+        "detailSerialNumber": [],
+      }
+     
+    ],
+    "description": "Maaf telah memberika stok opname",
+    "transDate": "04/07/2026"
+  }
+}

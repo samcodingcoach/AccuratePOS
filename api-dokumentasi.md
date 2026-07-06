@@ -1191,7 +1191,12 @@ Mengambil daftar hasil eksekusi stok opname dari Accurate Online.
           {
               "id": 1,
               "number": "SOR-001",
+              "description": "Hasil Stok Opname Bulan Juli",
               "transDate": "04/07/2026",
+              "order": {
+                  "id": 1,
+                  "number": "SOO-001"
+              },
               "status": "DRAFT"
           }
       ],

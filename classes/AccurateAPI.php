@@ -1249,7 +1249,8 @@ class AccurateAPI {
         
         $defaultParams = array(
             'sp.pageSize' => $limit,
-            'sp.page' => $page
+            'sp.page' => $page,
+            'fields' => 'number,description,transDate,order'
         );
         
         $finalParams = array_merge($defaultParams, $params);
