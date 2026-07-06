@@ -1216,7 +1216,7 @@ class AccurateAPI {
         $defaultParams = array(
             'sp.pageSize' => $limit,
             'sp.page' => $page,
-            'fields' => 'number,startDate,description,transDate,branchName,personCharged,warehouse,warehouse.name,statusName'
+            'fields' => 'id,number,startDate,description,transDate,branchName,personCharged,warehouse,warehouse.name,statusName'
         );
         
         $finalParams = array_merge($defaultParams, $params);
@@ -1250,7 +1250,7 @@ class AccurateAPI {
         $defaultParams = array(
             'sp.pageSize' => $limit,
             'sp.page' => $page,
-            'fields' => 'number,description,transDate,order'
+            'fields' => 'id,number,description,transDate,order'
         );
         
         $finalParams = array_merge($defaultParams, $params);

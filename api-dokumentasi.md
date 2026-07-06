@@ -1189,15 +1189,13 @@ Mengambil daftar hasil eksekusi stok opname dari Accurate Online.
       "message": "Data stok opname result berhasil diambil",
       "data": [
           {
-              "id": 1,
-              "number": "SOR-001",
-              "description": "Hasil Stok Opname Bulan Juli",
+              "number": "OPR.00001",
               "transDate": "04/07/2026",
+              "description": "Maaf telah memberika stok opname",
+              "transDateView": "04 Jul 2026",
               "order": {
-                  "id": 1,
-                  "number": "SOO-001"
-              },
-              "status": "DRAFT"
+                  "number": "OPO.00001"
+              }
           }
       ],
       "pagination": {
@@ -1223,18 +1221,44 @@ Mengambil informasi lengkap (detail) dari satu hasil stok opname tertentu.
       "status": "success",
       "message": "Detail stok opname result berhasil diambil",
       "data": {
-          "id": 1,
-          "number": "SOR-001",
-          "transDate": "04/07/2026",
-          "status": "DRAFT",
+          "number": "OPR.00001",
+          "id": 50,
+          "order": {
+              "number": "OPO.00001",
+              "id": 50,
+              "startDate": "04/07/2026",
+              "status": "DONE"
+          },
           "detailItem": [
               {
-                  "item": { "name": "Kopi Susu", "no": "BRG-001" },
-                  "actualQuantity": 98,
-                  "differenceQuantity": -2,
-                  "unitName": "PCS"
+                  "item": {
+                      "unit1": { "name": "Unit" },
+                      "name": "KRISBOW 4 INCI KIPAS ANGIN MEJA PERSONAL",
+                      "no": "100016"
+                  },
+                  "quantity": 84,
+                  "detailSerialNumber": [
+                      {
+                          "quantity": 1,
+                          "serialNumber": {
+                              "number": "KRB013",
+                              "updateStockDate": "01/01/2026"
+                          }
+                      }
+                  ]
+              },
+              {
+                  "item": {
+                      "unit1": { "name": "Unit" },
+                      "name": "POCO M7 (8GB/256GB) - Black",
+                      "no": "100014"
+                  },
+                  "quantity": 0,
+                  "detailSerialNumber": []
               }
-          ]
+          ],
+          "description": "Maaf telah memberika stok opname",
+          "transDate": "04/07/2026"
       }
   }
   ```
