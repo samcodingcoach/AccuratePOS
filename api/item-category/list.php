@@ -30,6 +30,8 @@ try {
         $payload['search'] = $_GET['search'];
     }
 
+    $filterLvl = isset($_GET['lvl']) ? (int)$_GET['lvl'] : null;
+
     // Eksekusi API
     $result = $api->getItemCategoryList($payload);
 
@@ -55,6 +57,11 @@ try {
         if (isset($category['parent']) && is_array($category['parent'])) {
             $parentId = $category['parent']['id'] ?? null;
             $parentName = $category['parent']['name'] ?? null;
+        }
+
+        // Jika user minta filter berdasarkan lvl, buang yang tidak cocok
+        if ($filterLvl !== null && $lvl !== $filterLvl) {
+            continue;
         }
 
         $filteredCategories[] = [
