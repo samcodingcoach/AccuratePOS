@@ -1110,6 +1110,7 @@ Mengambil daftar perintah stok opname dari Accurate Online.
 - **Parameter Query (Opsional):**
   - `page` (Integer): Halaman data.
   - `limit` (Integer): Jumlah maksimal data per halaman.
+  - `search` (String): Pencarian kata kunci dengan operator `EQUAL` (nomor transaksi, dsb).
   - `transDate` (String): Filter berdasarkan tanggal transaksi (format `DD/MM/YYYY`, contoh: `04/07/2026`).
 - **Response Sukses (200 OK):**
   **Contoh Output JSON:**

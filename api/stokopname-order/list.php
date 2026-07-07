@@ -22,9 +22,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $transDate = isset($_GET['transDate']) ? trim($_GET['transDate']) : '';
 
 $params = [];
+
+if (!empty($search)) {
+    $params['filter.keywords.op'] = 'EQUAL';
+    $params['filter.keywords.val'] = [$search];
+}
 
 if (!empty($transDate)) {
     $params['filter.transDate.op'] = 'EQUAL';
