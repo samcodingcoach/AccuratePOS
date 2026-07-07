@@ -1290,3 +1290,63 @@ Menyimpan data perintah stok opname baru, atau memperbarui perintah stok opname 
       }
   }
   ```
+
+---
+
+## FASE 7: Modul Pengaturan (Settings / Privileges)
+
+### 40. API Daftar Hak Akses (Access Privilege List)
+Mengambil daftar aturan grup hak akses pengguna yang tersedia dari Accurate Online.
+
+- **URL:** `/api/akses/list.php`
+- **Method:** `GET`
+- **Parameter Query (Opsional):**
+  - `page` (Integer): Halaman data.
+  - `limit` (Integer): Jumlah maksimal data per halaman.
+  - `search` (String): Pencarian hak akses berdasarkan nama secara spesifik (`EQUAL`).
+- **Response Sukses (200 OK):** Mengembalikan _array_ informasi hak akses.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data hak akses berhasil diambil",
+      "data": [
+          {
+              "id": 1,
+              "name": "Administrator",
+              "userList": [
+                  {
+                      "email": "ytb.samsu@gmail.com"
+                  }
+              ]
+          }
+      ],
+      "pagination": {
+          "page": 1,
+          "pageSize": 100,
+          "pageCount": 1,
+          "rowCount": 1
+      }
+  }
+  ```
+
+### 41. API Detail Hak Akses (Access Privilege Detail)
+Mengambil informasi lengkap dari suatu aturan hak akses pengguna.
+
+- **URL:** `/api/akses/detail.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `id` (Wajib - Integer): ID unik sistem grup hak akses.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail grup hak akses beserta izin modul-modulnya.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Detail hak akses berhasil diambil",
+      "data": {
+          "id": 1,
+          "name": "Administrator",
+          "description": "Akses Penuh"
+      }
+  }
+  ```
