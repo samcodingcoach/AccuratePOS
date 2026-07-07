@@ -1259,7 +1259,34 @@ Mengambil informasi lengkap (detail) dari satu hasil stok opname tertentu.
               }
           ],
           "description": "Maaf telah memberika stok opname",
-          "transDate": "04/07/2026"
+      }
+  }
+  ```
+
+### 39. API Simpan/Update Perintah Stok Opname (Save Stock Opname Order)
+Menyimpan data perintah stok opname baru, atau memperbarui perintah stok opname yang sudah ada.
+
+- **URL:** `/api/stokopname-order/save.php`
+- **Method:** `POST`
+- **Payload Data (JSON / Form-Data):**
+  - `personCharged` (Wajib - String): Nama Penanggung Jawab.
+  - `warehouseName` (Wajib - String): Nama Gudang (harus terdaftar).
+  - `startDate` (Wajib - String): Tanggal mulai eksekusi (format: `DD/MM/YYYY`).
+  - `transDate` (Opsional - String): Tanggal transaksi dibuat (format: `DD/MM/YYYY`). Jika kosong, otomatis diisi tanggal hari ini.
+  - `itemCategoryListName` (Opsional - Array): Daftar kategori barang (`["Elektronik", "ATK"]`).
+  - `userListAccount` (Opsional - Array): Daftar **Email** atau Akun pengguna pengeksekusi di Accurate (bukan _FullName_), contoh: `["budi@mail.com"]`.
+  - `number` (Opsional - String): Nomor seri dokumen. Jika dikosongkan akan di-*generate* Accurate otomatis.
+  - `id` (Opsional - Integer): ID dokumen untuk melakukan mode **Update**.
+  - `description` (Opsional - String): Catatan tambahan / Keterangan.
+- **Response Sukses (200 OK):** Mengembalikan status sukses beserta ID yang baru saja disimpan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data perintah stok opname berhasil disimpan",
+      "data": {
+          "id": 51,
+          "number": "OPO.00002"
       }
   }
   ```

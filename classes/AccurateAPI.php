@@ -1277,5 +1277,21 @@ class AccurateAPI {
         $endpoint .= '?' . http_build_query($params);
         return $this->makeRequest($endpoint, 'GET');
     }
+
+    public function saveStockOpnameOrder($data = array()) {
+        $endpoint = 'accurate/api/stock-opname-order/save.do';
+        
+        if (!isset($data['personCharged']) || trim($data['personCharged']) === '') {
+            return array('success' => false, 'error' => 'Parameter "personCharged" wajib diisi.');
+        }
+        if (!isset($data['warehouseName']) || trim($data['warehouseName']) === '') {
+            return array('success' => false, 'error' => 'Parameter "warehouseName" wajib diisi.');
+        }
+        if (!isset($data['transDate']) || trim($data['transDate']) === '') {
+            return array('success' => false, 'error' => 'Parameter "transDate" wajib diisi.');
+        }
+        
+        return $this->makeRequest($endpoint, 'POST', $data);
+    }
 }
 ?>
