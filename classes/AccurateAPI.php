@@ -1325,5 +1325,18 @@ class AccurateAPI {
         $endpoint .= '?' . http_build_query($params);
         return $this->makeRequest($endpoint, 'GET');
     }
+
+    public function saveStockOpnameResult($data = array()) {
+        $endpoint = 'accurate/api/stock-opname-result/save.do';
+        
+        if (!isset($data['orderNumber']) || trim($data['orderNumber']) === '') {
+            return array('success' => false, 'error' => 'Parameter "orderNumber" wajib diisi.');
+        }
+        if (!isset($data['transDate']) || trim($data['transDate']) === '') {
+            return array('success' => false, 'error' => 'Parameter "transDate" wajib diisi.');
+        }
+        
+        return $this->makeRequest($endpoint, 'POST', $data);
+    }
 }
 ?>

@@ -1350,3 +1350,52 @@ Mengambil informasi lengkap dari suatu aturan hak akses pengguna.
       }
   }
   ```
+
+---
+
+## FASE 6: Modul Stok Opname (Lanjutan)
+
+### 42. API Simpan/Update Hasil Stok Opname (Save Stock Opname Result)
+Menyimpan data hasil stok opname baru, atau memperbarui hasil stok opname yang sudah ada.
+
+- **URL:** `/api/stokopname-result/save.php`
+- **Method:** `POST`
+- **Payload Data (JSON / Form-Data):**
+  - `orderNumber` (Wajib - String): Nomor Perintah Stok Opname acuan.
+  - `transDate` (Opsional - String): Tanggal transaksi dibuat (format: `DD/MM/YYYY`). Jika kosong otomatis menggunakan tanggal hari ini.
+  - `description` (Opsional - String): Keterangan / Catatan.
+  - `number` (Opsional - String): Nomor seri hasil stok opname. Jika dikosongkan akan di-*generate* otomatis oleh Accurate.
+  - `id` (Opsional - Integer): ID unik untuk mode **Update** atau penghapusan data.
+  - `detailItem` (Opsional - Array of Objects): Daftar barang hasil opname.
+    - `detailItem[n].itemNo` (String): Nomor barang.
+    - `detailItem[n].quantity` (Number): Jumlah / Kuantitas aktual.
+  **Contoh Raw Input (JSON):**
+  ```json
+  {
+      "orderNumber": "OPO.00001",
+      "transDate": "04/07/2026",
+      "description": "Stok opname bulanan Gudang Utama",
+      "detailItem": [
+          {
+              "itemNo": "100016",
+              "quantity": 84
+          },
+          {
+              "itemNo": "100014",
+              "quantity": 0
+          }
+      ]
+  }
+  ```
+- **Response Sukses (200 OK):** Mengembalikan status sukses beserta ID dari hasil stok opname yang disimpan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data hasil stok opname berhasil disimpan",
+      "data": {
+          "id": 55,
+          "number": "OPR.00003"
+      }
+  }
+  ```
