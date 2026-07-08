@@ -1369,6 +1369,11 @@ Menyimpan data hasil stok opname baru, atau memperbarui hasil stok opname yang s
   - `detailItem` (Opsional - Array of Objects): Daftar barang hasil opname.
     - `detailItem[n].itemNo` (String): Nomor barang.
     - `detailItem[n].quantity` (Number): Jumlah / Kuantitas aktual.
+    - `detailItem[n].detailSerialNumber` (Opsional - Array of Objects): Daftar nomor seri (SN) untuk barang bersangkutan.
+      - `...detailSerialNumber[n]._status` (String): Isi `"delete"` jika SN ingin dihapus.
+      - `...detailSerialNumber[n].id` (Integer): Wajib untuk mode **Update** atau hapus SN.
+      - `...detailSerialNumber[n].quantity` (Number): Kuantitas untuk SN ini.
+      - `...detailSerialNumber[n].serialNumberNo` (String): Teks nomor seri barang.
   **Contoh Raw Input (JSON):**
   ```json
   {
@@ -1378,7 +1383,17 @@ Menyimpan data hasil stok opname baru, atau memperbarui hasil stok opname yang s
       "detailItem": [
           {
               "itemNo": "100016",
-              "quantity": 84
+              "quantity": 84,
+              "detailSerialNumber": [
+                  {
+                      "serialNumberNo": "KRB014",
+                      "quantity": 1
+                  },
+                  {
+                      "id": 1234,
+                      "_status": "delete"
+                  }
+              ]
           },
           {
               "itemNo": "100014",

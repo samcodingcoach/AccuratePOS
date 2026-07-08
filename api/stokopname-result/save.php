@@ -68,6 +68,24 @@ if (isset($input['detailItem']) && is_array($input['detailItem'])) {
         if (isset($item['quantity'])) {
             $dataToSave['detailItem[' . $index . '].quantity'] = $item['quantity'];
         }
+
+        // Nested Detail Serial Number
+        if (isset($item['detailSerialNumber']) && is_array($item['detailSerialNumber'])) {
+            foreach ($item['detailSerialNumber'] as $snIndex => $snItem) {
+                if (isset($snItem['_status'])) {
+                    $dataToSave['detailItem[' . $index . '].detailSerialNumber[' . $snIndex . ']._status'] = trim($snItem['_status']);
+                }
+                if (isset($snItem['id'])) {
+                    $dataToSave['detailItem[' . $index . '].detailSerialNumber[' . $snIndex . '].id'] = trim($snItem['id']);
+                }
+                if (isset($snItem['quantity'])) {
+                    $dataToSave['detailItem[' . $index . '].detailSerialNumber[' . $snIndex . '].quantity'] = $snItem['quantity'];
+                }
+                if (isset($snItem['serialNumberNo'])) {
+                    $dataToSave['detailItem[' . $index . '].detailSerialNumber[' . $snIndex . '].serialNumberNo'] = trim($snItem['serialNumberNo']);
+                }
+            }
+        }
     }
 }
 
