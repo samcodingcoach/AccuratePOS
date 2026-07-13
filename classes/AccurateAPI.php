@@ -1309,6 +1309,40 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
+    public function getItemAdjustmentList($params = array(), $page = 1, $limit = 100) {
+        $endpoint = 'accurate/api/item-adjustment/list.do';
+        
+        $defaultParams = array(
+            'sp.pageSize' => $limit,
+            'sp.page' => $page,
+            'fields' => 'id,number,transDate,description'
+        );
+        
+        $finalParams = array_merge($defaultParams, $params);
+        $endpoint .= '?' . http_build_query($finalParams);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
+    public function getItemAdjustmentDetail($id = null, $number = null) {
+        $endpoint = 'accurate/api/item-adjustment/detail.do';
+        $params = array();
+
+        if (!empty($id)) {
+            $params['id'] = $id;
+        } elseif (!empty($number)) {
+            $params['number'] = $number;
+        } else {
+            return array(
+                'success' => false,
+                'error' => 'Parameter "id" atau "number" wajib diisi.'
+            );
+        }
+
+        $endpoint .= '?' . http_build_query($params);
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
     public function getAccessPrivilegeList($params = array(), $page = 1, $limit = 100) {
         $endpoint = 'accurate/api/access-privilege/list.do';
         

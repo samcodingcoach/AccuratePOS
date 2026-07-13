@@ -1472,3 +1472,69 @@ Mengambil informasi lengkap (detail) dari suatu profil pemasok.
       }
   }
   ```
+
+---
+
+## FASE 10: Modul Penyesuaian Persediaan (Item Adjustment)
+
+### 45. API Daftar Penyesuaian Persediaan (Item Adjustment List)
+Mengambil daftar riwayat dokumen penyesuaian persediaan dari Accurate Online.
+
+- **URL:** `/api/item-adjustment/list.php`
+- **Method:** `GET`
+- **Parameter Query (Opsional):**
+  - `page` (Integer): Halaman ke berapa (Default: 1).
+  - `limit` (Integer): Jumlah maksimal data per halaman (Default: 100).
+  - `search` (String): Pencarian kata kunci nomor/deskripsi secara spesifik (operator `EQUAL`).
+  - `start_date` & `end_date` (String): Filter rentang tanggal transaksi (Format `DD/MM/YYYY`, misal: `01/07/2026`).
+- **Response Sukses (200 OK):**
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data item adjustment berhasil diambil",
+      "data": [
+          {
+              "id": 123,
+              "number": "ADJ.0001",
+              "transDate": "04/07/2026",
+              "description": "Penyesuaian stok opname",
+              "status": "DONE"
+          }
+      ],
+      "pagination": {
+          "page": 1,
+          "pageSize": 100,
+          "pageCount": 1,
+          "rowCount": 1
+      }
+  }
+  ```
+
+### 46. API Detail Penyesuaian Persediaan (Item Adjustment Detail)
+Mengambil informasi lengkap (detail) dari suatu dokumen penyesuaian persediaan.
+
+- **URL:** `/api/item-adjustment/detail.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `id` atau `number` (Salah Satu Wajib): ID unik sistem atau Nomor Dokumen.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail penyesuaian persediaan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Detail item adjustment berhasil diambil",
+      "data": {
+          "id": 123,
+          "number": "ADJ.0001",
+          "transDate": "04/07/2026",
+          "description": "Penyesuaian stok opname",
+          "detailItem": [
+              {
+                  "item": { "name": "Kopi Susu", "no": "BRG-001" },
+                  "quantity": 10
+              }
+          ]
+      }
+  }
+  ```
