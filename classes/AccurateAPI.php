@@ -1294,6 +1294,20 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'POST', $data);
     }
 
+    public function getVendorList($params = array(), $page = 1, $limit = 100) {
+        $endpoint = 'accurate/api/vendor/list.do';
+        
+        $defaultParams = array(
+            'sp.pageSize' => $limit,
+            'sp.page' => $page
+        );
+        
+        $finalParams = array_merge($defaultParams, $params);
+        $endpoint .= '?' . http_build_query($finalParams);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
     public function getAccessPrivilegeList($params = array(), $page = 1, $limit = 100) {
         $endpoint = 'accurate/api/access-privilege/list.do';
         

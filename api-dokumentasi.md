@@ -1414,3 +1414,61 @@ Menyimpan data hasil stok opname baru, atau memperbarui hasil stok opname yang s
       }
   }
   ```
+
+---
+
+## FASE 9: Modul Pemasok (Vendor)
+
+### 43. API Daftar Pemasok (Vendor List)
+Mengambil daftar pemasok (vendor) yang terdaftar di Accurate Online.
+
+- **URL:** `/api/vendor/list.php`
+- **Method:** `GET`
+- **Parameter Query (Opsional):**
+  - `page` (Integer): Halaman ke berapa (Default: 1).
+  - `limit` (Integer): Jumlah maksimal data per halaman (Default: 100).
+  - `search` (String): Filter pencarian nama/kode pemasok secara spesifik (operator `EQUAL`).
+- **Response Sukses (200 OK):**
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data vendor berhasil diambil",
+      "data": [
+          {
+              "id": 10,
+              "vendorNo": "V-001",
+              "name": "PT. ABC Pemasok"
+          }
+      ],
+      "pagination": {
+          "page": 1,
+          "pageSize": 100,
+          "pageCount": 1,
+          "rowCount": 1
+      }
+  }
+  ```
+
+### 44. API Detail Pemasok (Vendor Detail)
+Mengambil informasi lengkap (detail) dari suatu profil pemasok.
+
+- **URL:** `/api/vendor/detail.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `vendorNo` (Wajib - String): Nomor seri Pemasok (contoh: `"V-001"`).
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail pemasok.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Detail vendor berhasil diambil",
+      "data": {
+          "id": 10,
+          "vendorNo": "V-001",
+          "name": "PT. ABC Pemasok",
+          "mobilePhone": "081234567890",
+          "email": "kontak@abc.com"
+      }
+  }
+  ```
