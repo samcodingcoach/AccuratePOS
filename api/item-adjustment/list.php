@@ -28,8 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 $page  = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-$startDate = isset($_GET['start_date']) ? trim($_GET['start_date']) : '';
-$endDate = isset($_GET['end_date']) ? trim($_GET['end_date']) : '';
+$startDate = isset($_GET['startDate']) ? trim($_GET['startDate']) : (isset($_GET['start_date']) ? trim($_GET['start_date']) : '');
+$endDate = isset($_GET['endDate']) ? trim($_GET['endDate']) : (isset($_GET['end_date']) ? trim($_GET['end_date']) : '');
 
 $params = [];
 
