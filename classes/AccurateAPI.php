@@ -1343,6 +1343,16 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
+    public function saveItemAdjustment($data = array()) {
+        $endpoint = 'accurate/api/item-adjustment/save.do';
+        
+        if (!isset($data['adjustmentAccountNo']) || trim($data['adjustmentAccountNo']) === '') {
+            return array('success' => false, 'error' => 'Parameter "adjustmentAccountNo" wajib diisi.');
+        }
+        
+        return $this->makeRequest($endpoint, 'POST', $data);
+    }
+
     public function getAccessPrivilegeList($params = array(), $page = 1, $limit = 100) {
         $endpoint = 'accurate/api/access-privilege/list.do';
         

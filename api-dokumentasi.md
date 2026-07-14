@@ -1530,11 +1530,262 @@ Mengambil informasi lengkap (detail) dari suatu dokumen penyesuaian persediaan.
           "transDate": "04/07/2026",
           "description": "Penyesuaian stok opname",
           "detailItem": [
+- **Parameter Query:**
+  - `id` (Wajib - Integer): ID unik sistem grup hak akses.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail grup hak akses beserta izin modul-modulnya.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Detail hak akses berhasil diambil",
+      "data": {
+          "id": 1,
+          "name": "Administrator",
+          "description": "Akses Penuh"
+      }
+  }
+  ```
+
+---
+
+## FASE 6: Modul Stok Opname (Lanjutan)
+
+### 42. API Simpan/Update Hasil Stok Opname (Save Stock Opname Result)
+Menyimpan data hasil stok opname baru, atau memperbarui hasil stok opname yang sudah ada.
+
+- **URL:** `/api/stokopname-result/save.php`
+- **Method:** `POST`
+- **Payload Data (JSON / Form-Data):**
+  - `orderNumber` (Wajib - String): Nomor Perintah Stok Opname acuan.
+  - `transDate` (Opsional - String): Tanggal transaksi dibuat (format: `DD/MM/YYYY`). Jika kosong otomatis menggunakan tanggal hari ini.
+  - `description` (Opsional - String): Keterangan / Catatan.
+  - `number` (Opsional - String): Nomor seri hasil stok opname. Jika dikosongkan akan di-*generate* otomatis oleh Accurate.
+  - `id` (Opsional - Integer): ID unik untuk mode **Update** atau penghapusan data.
+  - `detailItem` (Opsional - Array of Objects): Daftar barang hasil opname.
+    - `detailItem[n].itemNo` (String): Nomor barang.
+    - `detailItem[n].quantity` (Number): Jumlah / Kuantitas aktual.
+    - `detailItem[n].detailSerialNumber` (Opsional - Array of Objects): Daftar nomor seri (SN) untuk barang bersangkutan.
+      - `...detailSerialNumber[n]._status` (String): Isi `"delete"` jika SN ingin dihapus.
+      - `...detailSerialNumber[n].id` (Integer): Wajib untuk mode **Update** atau hapus SN.
+      - `...detailSerialNumber[n].quantity` (Number): Kuantitas untuk SN ini.
+      - `...detailSerialNumber[n].serialNumberNo` (String): Teks nomor seri barang.
+  **Contoh Raw Input (JSON):**
+  ```json
+  {
+      "orderNumber": "OPO.00001",
+      "transDate": "04/07/2026",
+      "description": "Stok opname bulanan Gudang Utama",
+      "detailItem": [
+          {
+              "itemNo": "100016",
+              "quantity": 84,
+              "detailSerialNumber": [
+                  {
+                      "serialNumberNo": "KRB014",
+                      "quantity": 1
+                  },
+                  {
+                      "id": 1234,
+                      "_status": "delete"
+                  }
+              ]
+          },
+          {
+              "itemNo": "100014",
+              "quantity": 0
+          }
+      ]
+  }
+  ```
+- **Response Sukses (200 OK):** Mengembalikan status sukses beserta ID dari hasil stok opname yang disimpan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data hasil stok opname berhasil disimpan",
+      "data": {
+          "id": 55,
+          "number": "OPR.00003"
+      }
+  }
+  ```
+
+---
+
+## FASE 9: Modul Pemasok (Vendor)
+
+### 43. API Daftar Pemasok (Vendor List)
+Mengambil daftar pemasok (vendor) yang terdaftar di Accurate Online.
+
+- **URL:** `/api/vendor/list.php`
+- **Method:** `GET`
+- **Parameter Query (Opsional):**
+  - `page` (Integer): Halaman ke berapa (Default: 1).
+  - `limit` (Integer): Jumlah maksimal data per halaman (Default: 100).
+  - `search` (String): Filter pencarian nama/kode pemasok secara spesifik (operator `EQUAL`).
+- **Response Sukses (200 OK):**
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data vendor berhasil diambil",
+      "data": [
+          {
+              "id": 10,
+              "vendorNo": "V-001",
+              "name": "PT. ABC Pemasok"
+          }
+      ],
+      "pagination": {
+          "page": 1,
+          "pageSize": 100,
+          "pageCount": 1,
+          "rowCount": 1
+      }
+  }
+  ```
+
+### 44. API Detail Pemasok (Vendor Detail)
+Mengambil informasi lengkap (detail) dari suatu profil pemasok.
+
+- **URL:** `/api/vendor/detail.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `vendorNo` (Wajib - String): Nomor seri Pemasok (contoh: `"V-001"`).
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail pemasok.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Detail vendor berhasil diambil",
+      "data": {
+          "id": 10,
+          "vendorNo": "V-001",
+          "name": "PT. ABC Pemasok",
+          "mobilePhone": "081234567890",
+          "email": "kontak@abc.com"
+      }
+  }
+  ```
+
+---
+
+## FASE 10: Modul Penyesuaian Persediaan (Item Adjustment)
+
+### 45. API Daftar Penyesuaian Persediaan (Item Adjustment List)
+Mengambil daftar riwayat dokumen penyesuaian persediaan dari Accurate Online.
+
+- **URL:** `/api/item-adjustment/list.php`
+- **Method:** `GET`
+- **Parameter Query (Opsional):**
+  - `page` (Integer): Halaman ke berapa (Default: 1).
+  - `limit` (Integer): Jumlah maksimal data per halaman (Default: 100).
+  - `search` (String): Pencarian kata kunci nomor/deskripsi secara spesifik (operator `EQUAL`).
+  - `start_date` & `end_date` (String): Filter rentang tanggal transaksi (Format `DD/MM/YYYY`, misal: `01/07/2026`).
+- **Response Sukses (200 OK):**
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data item adjustment berhasil diambil",
+      "data": [
+          {
+              "id": 123,
+              "number": "ADJ.0001",
+              "transDate": "04/07/2026",
+              "description": "Penyesuaian stok opname",
+              "status": "DONE"
+          }
+      ],
+      "pagination": {
+          "page": 1,
+          "pageSize": 100,
+          "pageCount": 1,
+          "rowCount": 1
+      }
+  }
+  ```
+
+### 46. API Detail Penyesuaian Persediaan (Item Adjustment Detail)
+Mengambil informasi lengkap (detail) dari suatu dokumen penyesuaian persediaan.
+
+- **URL:** `/api/item-adjustment/detail.php`
+- **Method:** `GET`
+- **Parameter Query:**
+  - `id` atau `number` (Salah Satu Wajib): ID unik sistem atau Nomor Dokumen.
+- **Response Sukses (200 OK):** Mengembalikan _object_ detail penyesuaian persediaan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Detail item adjustment berhasil diambil",
+      "data": {
+          "id": 123,
+          "number": "ADJ.0001",
+          "transDate": "04/07/2026",
+          "description": "Penyesuaian stok opname",
+          "detailItem": [
               {
                   "item": { "name": "Kopi Susu", "no": "BRG-001" },
                   "quantity": 10
               }
           ]
+      }
+  }
+  ```
+
+### 47. API Simpan Penyesuaian Persediaan (Save Item Adjustment)
+Menyimpan data penyesuaian persediaan baru, atau memperbarui dokumen yang sudah ada.
+
+- **URL:** `/api/item-adjustment/save.php`
+- **Method:** `POST`
+- **Payload Data (JSON / Form-Data):**
+  - `adjustmentAccountNo` (Wajib - String): Nomor Akun Perkiraan Penyesuaian.
+  - `transDate` (Opsional - String): Tanggal transaksi (format: `DD/MM/YYYY`). Jika kosong otomatis menggunakan tanggal hari ini.
+  - `description` (Opsional - String): Keterangan atau Catatan penyesuaian.
+  - `id` (Opsional - Integer): ID unik untuk mode **Update**.
+  - `detailItem` (Opsional - Array of Objects): Daftar rincian barang yang disesuaikan.
+    - `detailItem[n].itemAdjustmentType` (Wajib - String): Tipe penyesuaian (`ADJUSTMENT_IN`, `ADJUSTMENT_OUT`, atau `ADJUSTMENT_STOCK`).
+    - `detailItem[n].itemNo` (Wajib - String): Nomor seri barang.
+    - `detailItem[n].quantity` (Wajib - Number): Kuantitas yang disesuaikan.
+    - `detailItem[n].unitCost` (Wajib - Double/Number): Harga modal/biaya satuan.
+    - `detailItem[n].warehouseName` (Opsional - String): Nama Gudang penyimpanan barang tersebut.
+    - `detailItem[n].detailNotes` (Opsional - String): Catatan rincian khusus per barang.
+  **Contoh Raw Input (JSON):**
+  ```json
+  {
+      "adjustmentAccountNo": "5101",
+      "transDate": "14/07/2026",
+      "description": "Penyesuaian kuantitas dari Stok Opname OPO.00011",
+      "detailItem": [
+          {
+              "itemAdjustmentType": "ADJUSTMENT_IN",
+              "itemNo": "BRG-001",
+              "quantity": 10,
+              "unitCost": 15000,
+              "warehouseName": "Gudang Utama",
+              "detailNotes": "Penambahan selisih stok opname"
+          },
+          {
+              "itemAdjustmentType": "ADJUSTMENT_OUT",
+              "itemNo": "BRG-002",
+              "quantity": 5,
+              "unitCost": 12000,
+              "warehouseName": "Gudang Utama",
+              "detailNotes": "Pengurangan barang rusak"
+          }
+      ]
+  }
+  ```
+- **Response Sukses (200 OK):** Mengembalikan status sukses beserta rincian data tersimpan.
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data item adjustment berhasil disimpan",
+      "data": {
+          "id": 124,
+          "number": "ADJ.0002"
       }
   }
   ```
