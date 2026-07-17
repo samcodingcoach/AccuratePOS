@@ -1751,6 +1751,9 @@ Menyimpan data penyesuaian persediaan baru, atau memperbarui dokumen yang sudah 
     - `detailItem[n].unitCost` (Wajib - Double/Number): Harga modal/biaya satuan.
     - `detailItem[n].warehouseName` (Opsional - String): Nama Gudang penyimpanan barang tersebut.
     - `detailItem[n].detailNotes` (Opsional - String): Catatan rincian khusus per barang.
+    - `detailItem[n].detailSerialNumber` (Opsional - Array of Objects): Daftar nomor seri (SN) untuk barang bersangkutan (jika barang merupakan tipe nomor seri).
+      - `...detailSerialNumber[n].serialNumberNo` (String): Teks nomor seri barang.
+      - `...detailSerialNumber[n].quantity` (Number): Kuantitas untuk SN ini (pasti 1).
   **Contoh Raw Input (JSON):**
   ```json
   {
@@ -1764,7 +1767,13 @@ Menyimpan data penyesuaian persediaan baru, atau memperbarui dokumen yang sudah 
               "quantity": 10,
               "unitCost": 15000,
               "warehouseName": "Gudang Utama",
-              "detailNotes": "Penambahan selisih stok opname"
+              "detailNotes": "Penambahan selisih stok opname",
+              "detailSerialNumber": [
+                  {
+                      "serialNumberNo": "SN-A001",
+                      "quantity": 1
+                  }
+              ]
           },
           {
               "itemAdjustmentType": "ADJUSTMENT_OUT",

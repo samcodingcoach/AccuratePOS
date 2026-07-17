@@ -74,6 +74,21 @@ if (isset($input['detailItem']) && is_array($input['detailItem'])) {
         if (isset($item['warehouseName'])) {
             $dataToSave['detailItem[' . $index . '].warehouseName'] = trim($item['warehouseName']);
         }
+        
+        // Nested Detail Serial Number
+        if (isset($item['detailSerialNumber']) && is_array($item['detailSerialNumber'])) {
+            foreach ($item['detailSerialNumber'] as $snIndex => $snItem) {
+                if (isset($snItem['serialNumberNo'])) {
+                    $dataToSave['detailItem[' . $index . '].detailSerialNumber[' . $snIndex . '].serialNumberNo'] = trim($snItem['serialNumberNo']);
+                }
+                // Quantity untuk serial number umumnya adalah 1
+                if (isset($snItem['quantity'])) {
+                    $dataToSave['detailItem[' . $index . '].detailSerialNumber[' . $snIndex . '].quantity'] = $snItem['quantity'];
+                } else {
+                    $dataToSave['detailItem[' . $index . '].detailSerialNumber[' . $snIndex . '].quantity'] = 1;
+                }
+            }
+        }
     }
 }
 
