@@ -1825,3 +1825,33 @@ Menghitung total keseluruhan nilai penerimaan penjualan (*Sales Receipt*) khusus
       }
   }
   ```
+
+### 49. API 3 Faktur Penjualan Terakhir Hari Ini (Lokal Caching 1 Jam)
+Menarik 3 data Faktur Penjualan (Sales Invoice) terbaru yang statusnya "Lunas" pada hari ini. Jika belum ada di *cache* lokal, API akan mencari ke Accurate, memfilter yang lunas, mengurutkan 3 teratas, mengambil detailnya, lalu menyimpannya ke tabel MariaDB.
+
+- **URL:** `/api/dashboard/faktur-terakhir.php`
+- **Method:** `GET`
+- **Alur Logika (Workflow):**
+  1. Mengecek ketersediaan data di tabel lokal `last_sale` untuk hari ini.
+  2. Jika data tersedia dan tersinkronisasi kurang dari 1 jam yang lalu, mengembalikan data lokal (maksimal 3 *row*).
+  3. Jika kosong atau > 1 jam, memanggil Accurate `getSalesInvoiceList`, mengambil yang "Lunas", lalu di-*sort* berdasarkan ID untuk mendapat 3 terbaru.
+  4. Masing-masing dari 3 data tersebut di-hit lagi menggunakan `getSalesInvoiceDetail` untuk melengkapi variabel seperti `invoiceTime`, `branchName`, dan `receiptHistory`.
+  5. Menghapus (*DELETE*) riwayat hari ini di `last_sale` lalu melakukan `INSERT` ulang 3 data terbaru tersebut.
+- **Response Sukses (200 OK):** 
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data disinkronisasi dari Accurate",
+      "data": [
+          {
+              "invoiceTime": "09:19:08",
+              "number": "SI.2026.07.00001",
+              "statusName": "Lunas",
+              "totalAmount": 16292822,
+              "branchName": "Kantor Pusat",
+              "receiptHistoryNumber": "110103.2026.07.00001"
+          }
+      ]
+  }
+  ```
