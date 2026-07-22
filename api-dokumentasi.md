@@ -1855,3 +1855,35 @@ Menarik 3 data Faktur Penjualan (Sales Invoice) terbaru yang statusnya "Lunas" p
       ]
   }
   ```
+
+### 50. API Stok Barang Menipis (3 Tersedikit)
+Mencari 3 barang dengan jumlah kuantitas stok paling sedikit secara global (seluruh cabang). Menggunakan mekanisme *caching* 1 Jam di database lokal MariaDB untuk mempercepat proses karena fitur ini memanggil seluruh data *inventory* secara masif.
+
+- **URL:** `/api/dashboard/stok-menipis.php`
+- **Method:** `GET`
+- **Alur Logika (Workflow):**
+  1. API mengecek ketersediaan data di tabel lokal `last_stok` untuk hari ini.
+  2. Jika data tersedia dan usianya belum 1 jam, API mengembalikan 3 data stok dari MariaDB tersebut.
+  3. Jika kosong atau usianya > 1 jam, API memanggil `getListStock` dari Accurate (melakukan *looping* hingga halaman terakhir).
+  4. Semua item yang terkumpul akan di-*sort* secara ascending (terkecil ke terbesar) berdasarkan *field* `quantity`.
+  5. Skrip mengambil 3 data teratas (tersedikit), lalu melakukan *DELETE* data lama hari ini dan me-*replace*-nya dengan *INSERT* 3 barang tersebut ke tabel MariaDB.
+- **Response Sukses (200 OK):** 
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data disinkronisasi dari Accurate",
+      "data": [
+          {
+              "itemNo": "100008",
+              "name": "AXIOO HYPE 10 | N4020 8GB 256GB",
+              "quantity": 2
+          },
+          {
+              "itemNo": "100010",
+              "name": "FLASHDISK 16GB",
+              "quantity": 5
+          }
+      ]
+  }
+  ```
