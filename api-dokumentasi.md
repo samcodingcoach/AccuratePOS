@@ -1796,5 +1796,32 @@ Menyimpan data penyesuaian persediaan baru, atau memperbarui dokumen yang sudah 
           "id": 124,
           "number": "ADJ.0002"
       }
+      }
+  }
+  ```
+
+---
+
+## FASE 11: Modul Dasbor (Dashboard)
+
+### 48. API Total Penerimaan Hari Ini (Lokal Caching 1 Jam)
+Menghitung total keseluruhan nilai penerimaan penjualan (*Sales Receipt*) khusus untuk hari ini (tanggal server). Dilengkapi dengan mekanisme caching menggunakan *database* lokal (MariaDB) untuk mencegah *rate limit* API.
+
+- **URL:** `/api/dashboard/total-penerimaan.php`
+- **Method:** `GET`
+- **Alur Logika (Workflow):**
+  1. API mengecek ketersediaan data di tabel lokal `report_sale` untuk hari ini.
+  2. Jika data tersedia dan tersinkronisasi kurang dari 1 jam yang lalu, API langsung mengembalikan data lokal (sangat cepat).
+  3. Jika data kosong atau sudah melebihi 1 jam, API menembak Accurate (melakukan paginasi berulang hingga tuntas), menghitung totalnya, lalu menyimpannya (Insert/Update) ke `report_sale`.
+- **Response Sukses (200 OK):** 
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data disinkronisasi dari Accurate",
+      "data": {
+          "totalPenerimaan": 45500000.5,
+          "date": "22/07/2026"
+      }
   }
   ```
