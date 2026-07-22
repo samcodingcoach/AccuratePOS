@@ -431,6 +431,24 @@ class AccurateAPI {
         return $this->makeRequest($endpoint, 'GET');
     }
 
+    /**
+     * Mendapatkan riwayat mutasi stok barang
+     * Endpoint: accurate/api/item/stock-mutation-history.do
+     */
+    public function getStockMutationHistory($params = array()) {
+        $endpoint = 'accurate/api/item/stock-mutation-history.do';
+        
+        $defaultParams = array(
+            'sp.pageSize' => 100,
+            'sp.page'     => 1
+        );
+        
+        $finalParams = array_merge($defaultParams, $params);
+        $endpoint .= '?' . http_build_query($finalParams);
+        
+        return $this->makeRequest($endpoint, 'GET');
+    }
+
     public function getListStock($warehouseName = '', $limit = 100, $page = 1) {
         // Inisialisasi variabel params agar aman dari Undefined Variable Error
         $params = array();

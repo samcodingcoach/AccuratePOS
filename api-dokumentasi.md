@@ -1887,3 +1887,41 @@ Mencari 3 barang dengan jumlah kuantitas stok paling sedikit secara global (selu
       ]
   }
   ```
+
+---
+
+## FASE 12: Riwayat Mutasi Barang (Stock Mutation History)
+
+### 51. Riwayat Mutasi Stok Barang
+Menarik data *Stock Mutation History* dari Accurate untuk melacak riwayat pergerakan masuk-keluar stok berdasarkan item.
+
+- **URL:** `/api/item/stok-mutasi.php`
+- **Method:** `GET`
+- **Scope:** `stock_mutation_history_view`
+- **Parameter URL:**
+  - `limit` *(opsional, default 100)*: Membatasi (*sp.pageSize*) jumlah mutasi yang ditarik per halaman.
+  - `page` *(opsional, default 1)*: Nomor halaman paginasi (*sp.page*).
+  - *(Mendukung parameter filter spesifik Accurate lainnya melalui URL GET, contoh: `?filter.itemNo.op=EQUAL&filter.itemNo.val=BRG-01`)*
+- **Response Sukses (200 OK):** 
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data riwayat mutasi stok berhasil diambil",
+      "data": [
+          {
+              "itemNo": "BRG-001",
+              "itemName": "Barang Contoh 1",
+              "transType": "SALES_INVOICE",
+              "transDate": "22/07/2026",
+              "quantity": -2
+          }
+      ],
+      "pagination": {
+          "current_page": 1,
+          "total_page": 1,
+          "total_items": 1,
+          "has_more": false
+      }
+  }
+  ```
