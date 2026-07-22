@@ -1925,3 +1925,37 @@ Menarik data *Stock Mutation History* dari Accurate untuk melacak riwayat perger
       }
   }
   ```
+
+### 52. API 3 Barang Terlaris Hari Ini (Lokal Caching 1 Jam)
+Menghitung 3 barang dengan mutasi keluar paling banyak dari Faktur Penjualan (SI) pada hari ini. Karena Accurate API tidak menyediakan nama barang pada modul *Stock Mutation*, API ini secara otomatis akan mencari (*lookup*) nama barang tersebut dari *database* lokal (tabel `item`), lalu mem-*cache* hasilnya ke dalam tabel `last_terlaris`.
+
+- **URL:** `/api/dashboard/barang-terlaris.php`
+- **Method:** `GET`
+- **Alur Logika (Workflow):**
+  1. API mengecek ketersediaan data di tabel lokal `last_terlaris` untuk tanggal hari ini.
+  2. Jika data tersedia dan usianya belum 1 jam, API mengembalikan 3 data dari MariaDB.
+  3. Jika kosong atau usianya > 1 jam, API memanggil `getStockMutationHistory` dengan filter `transactionType = SI` dan rentang waktu hari ini (`00:00:00` - `23:59:59`).
+  4. Semua item yang mutasinya terekam akan dijumlahkan dan dikelompokkan berdasarkan `itemNo`. Nilai mutasi (minus) akan dikonversi menjadi absolut positif (terjual).
+  5. Seluruh item di-*sort* secara Descending (terbesar ke terkecil) lalu dipotong menjadi 3 teratas.
+  6. Nama barang dicari melalui *query* ke MariaDB lokal (`item` table).
+  7. API me-*replace* data lama hari ini di `last_terlaris` dan memasukkan 3 data baru tersebut beserta stempel `last_sync`-nya.
+- **Response Sukses (200 OK):** 
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data disinkronisasi dari Accurate",
+      "data": [
+          {
+              "itemNo": "100001",
+              "name": "FlashDisk TOSHIBA 2GB",
+              "terjual": 15
+          },
+          {
+              "itemNo": "100005",
+              "name": "Mouse Logitech B100",
+              "terjual": 8
+          }
+      ]
+  }
+  ```
