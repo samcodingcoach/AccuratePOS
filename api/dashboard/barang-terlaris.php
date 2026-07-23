@@ -82,9 +82,6 @@ try {
         $params = [
             'filter.transactionType.op'  => 'EQUAL',
             'filter.transactionType.val' => 'SI', // Hanya Faktur Penjualan
-            'filter.createDate.op'       => 'BETWEEN',
-            'filter.createDate.val[0]'   => $accurateDate . ' 00:00:00', // Dari jam 00 malam
-            'filter.createDate.val[1]'   => $accurateDate . ' 23:59:59', // Sampai jam 23:59 malam
             'sp.page'                    => $page,
             'sp.pageSize'                => 100
         ];
