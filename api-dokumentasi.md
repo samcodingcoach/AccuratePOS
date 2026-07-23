@@ -1959,3 +1959,27 @@ Menghitung 3 barang dengan mutasi keluar paling banyak dari Faktur Penjualan (SI
       ]
   }
   ```
+
+### 53. API Dashboard Rugi Laba (Lokal Caching 1 Jam)
+Menarik metrik krusial berupa `hpp` (Harga Pokok Penjualan) dan `labaBersih` (Net Profit) dari Accurate berdasarkan transaksi bulan berjalan (tanggal 1 sampai akhir bulan). Data di-*cache* ke tabel MariaDB `last_rugilaba` per hari.
+
+- **URL:** `/api/dashboard/rugi-laba.php`
+- **Method:** `GET`
+- **Alur Logika (Workflow):**
+  1. API mengecek ketersediaan data di tabel lokal `last_rugilaba` untuk tanggal hari ini.
+  2. Jika data tersedia dan usianya belum 1 jam, API mengembalikan HPP & Laba Bersih dari MariaDB.
+  3. Jika kosong atau usianya > 1 jam, API memanggil `getPLAccountAmount(awal_bulan, akhir_bulan)` dari Accurate.
+  4. Semua transaksi direkapitulasi secara *real-time* untuk mendapatkan nilai HPP dan Laba Bersih yang akurat berdasarkan klasifikasi akun (*Level 1*).
+  5. Hasilnya ditulis (*INSERT*) ulang ke tabel `last_rugilaba` untuk menjadi *cache* akses selanjutnya, menggantikan data lama.
+- **Response Sukses (200 OK):** 
+  **Contoh Output JSON:**
+  ```json
+  {
+      "status": "success",
+      "message": "Data disinkronisasi dari Accurate",
+      "summary": {
+          "hpp": 15679000,
+          "labaBersih": -208170
+      }
+  }
+  ```

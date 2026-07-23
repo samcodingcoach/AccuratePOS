@@ -63,7 +63,7 @@ try {
             
             $lvl = isset($item['lvl']) ? (int)$item['lvl'] : 0;
             $isParent = !empty($item['isParent']);
-            $shouldAddToTotal = ($lvl === 1 && $isParent);
+            $shouldAddToTotal = ($lvl === 1); // Tambahkan semua akun level 1 (Root), terlepas ia punya sub-akun atau berdiri sendiri
 
             if ($type === 'REVENUE') {
                 $groupedData['revenue']['items'][] = $item;
